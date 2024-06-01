@@ -8,7 +8,7 @@
 #include "base/Hooks.h"
 #include "base/Modules.h"
 
-struct RecConfig {
+struct Movie {
   std::string filename;
   int width;
   int height;
@@ -22,7 +22,7 @@ class Recorder : public Module {
   void Unload();
 
  private:
-  RecConfig config;
+  Movie movie;
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
 
