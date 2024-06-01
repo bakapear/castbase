@@ -26,10 +26,7 @@ class Recorder : public Module {
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
 
-  void Hook_WriteMovieFrame(const MovieInfo_t& info);
   void Hook_FrameStageNotify(ClientFrameStage_t curStage);
-  void Hook_ReadPixels_0(int x, int y, int width, int height, unsigned char* data, ImageFormat dstFormat);
-  void Hook_ReadPixels_1(Rect_t* pSrcRect, Rect_t* pDstRect, unsigned char* data, ImageFormat dstFormat, int nDstStride);
 
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", 0);
