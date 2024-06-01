@@ -1,0 +1,3 @@
+extern const char* const PLUGIN_NAME = "@PLUGIN_NAME@";
+extern const char* const PLUGIN_VERSION = "@PLUGIN_VERSION@";
+extern const char* const PLUGIN_DESC = "@PLUGIN_NAME@ @PLUGIN_VERSION@";

@@ -1,0 +1,4 @@
+﻿BasedOnStyle: Google
+ColumnLimit: 9999
+AllowShortCaseLabelsOnASingleLine: True
+AllowShortEnumsOnASingleLine: False
