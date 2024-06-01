@@ -19,7 +19,7 @@ set(SRC_DIR src)
 set(PLUGIN_NAME ${PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git AND EXISTS ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/git-data/head-ref)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/ORIG_HEAD)
     include(cmake/GetGitRevisionDescription.cmake)
     get_git_head_revision(GIT_REFSPEC GIT_SHA1)
     string(SUBSTRING ${GIT_SHA1} 0 7 GIT_SHA1_SHORT)
