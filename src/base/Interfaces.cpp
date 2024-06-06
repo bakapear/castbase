@@ -48,8 +48,6 @@ IClientRenderTargets *Interfaces::ClientRenderTargets = nullptr;
 bool Interfaces::SteamLibrariesAvailable = false;
 bool Interfaces::VGUILibrariesAvailable = false;
 
-IVideoMode *Interfaces::VideoMode = nullptr;
-
 void Interfaces::Load(CreateInterfaceFn factory) {
   ConnectTier1Libraries(&factory, 1);
   ConnectTier2Libraries(&factory, 1);
@@ -86,8 +84,6 @@ void Interfaces::Load(CreateInterfaceFn factory) {
 
   SteamAPIContext = new CSteamAPIContext();
   SteamLibrariesAvailable = SteamAPI_InitSafe() && SteamAPIContext->Init();
-
-  VideoMode = (IVideoMode *)Sig::Scan("engine.dll", "48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B 05 ? ? ? ?", 3);
 }
 
 void Interfaces::Unload() {
@@ -113,8 +109,6 @@ void Interfaces::Unload() {
 
   SteamLibrariesAvailable = false;
   VGUILibrariesAvailable = false;
-
-  VideoMode = nullptr;
 
   DisconnectTier3Libraries();
   DisconnectTier2Libraries();

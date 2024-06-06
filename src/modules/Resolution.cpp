@@ -5,16 +5,14 @@
 #include <modes.h>
 
 #include "base/Interfaces.h"
-#include "base/fills/ivideomode.h"
 
 #define MAX_MODE_LIST 512
 
-// GetInterModeCount & RegisterResolution from https://github.com/jooonior/SourceRes
+// https://github.com/jooonior/SourceRes
+namespace SourceRes {
 
-/**
- * Find the address of the engine's internal video mode count.
- */
-static int* GetInternalModeCount(const vmode_s* modeList, int count) {
+// Find the address of the engine's internal video mode count.
+int* GetInternalModeCount(const vmode_s* modeList, int count) {
   // Mode count should be right before the mode array.
   int* modeCount = (int*)modeList - 1;
 
@@ -50,7 +48,7 @@ static bool RegisterResolution(int width, int height) {
     throw "Video mode array is full. Can't add any more modes.";
   }
 
-  int* modeCount = GetInternalModeCount(modeList, count);
+  int* modeCount = SourceRes::GetInternalModeCount(modeList, count);
 
   // These seem to have the same value across all modes.
   int refreshRate = modeList[0].refreshRate;
@@ -76,6 +74,8 @@ static bool RegisterResolution(int width, int height) {
   return true;
 }
 
+}  // namespace SourceRes
+
 void Resolution::resolution_set(const CCommand& args) {
   if (args.ArgC() != 3) {
     return ConMsg("Usage:  resolution_set <width> <height>\n");
@@ -84,6 +84,9 @@ void Resolution::resolution_set(const CCommand& args) {
   int width = strtol(args.Arg(1), NULL, 10);
   int height = strtol(args.Arg(2), NULL, 10);
 
-  RegisterResolution(width, height);
-  Interfaces::VideoMode->SetMode(width, height, 1);
+  SourceRes::RegisterResolution(width, height);
+
+  char cmd[32];
+  sprintf(cmd, "mat_setvideomode %i %i 1", width, height);
+  Interfaces::EngineClient->ClientCmd_Unrestricted(cmd);
 }

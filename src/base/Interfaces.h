@@ -12,7 +12,6 @@ class IBaseClientDLL;
 class IClientEngineTools;
 class IClientEntityList;
 class IClientMode;
-class IVideoMode;
 class IClientRenderTargets;
 class IEngineTool;
 class IGameEventManager2;
@@ -81,7 +80,4 @@ class Interfaces final {
 
   static bool SteamLibrariesAvailable;
   static bool VGUILibrariesAvailable;
-
-  // #include "base/fills/ivideomode.h"
-  static IVideoMode* VideoMode;
 };
