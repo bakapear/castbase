@@ -1,5 +1,6 @@
 #include "Recorder.h"
 
+#include <cdll_int.h>
 #include <shaderapi/ishaderapi.h>
 #include <tier1/KeyValues.h>
 #include <toolframework/ienginetool.h>
@@ -7,26 +8,22 @@
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
-void Recorder::Hook_FrameStageNotify(ClientFrameStage_t curStage) {
-  if (curStage != FRAME_RENDER_END) return;
-
+bool Recorder::FilterTime(float dt) {
   if (this->isRecording) {
-    uint8_t* data = new uint8_t[movie.width * movie.height * 3];
-    Interfaces::ShaderAPI->ReadPixels(0, 0, movie.width, movie.height, data, IMAGE_FORMAT_RGB888);
-    delete data;
-    RETURN_META(MRES_SUPERCEDE);
+    // on record
   }
+
+  Msg("YOYOYO\n");
+
+  return true;
 }
 
 void Recorder::Load() {
-  SH_ADD_HOOK(IBaseClientDLL, FrameStageNotify, Interfaces::ClientDLL, SH_MEMBER(this, &Recorder::Hook_FrameStageNotify), false);
-  // add hook
+  void* ptr = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
+  hookFilterTime.InstallMember(ptr, &Recorder::FilterTime, this, subhook::HookFlags::HookFlagTrampoline);
 }
 
-void Recorder::Unload() {
-  SH_REMOVE_HOOK(IBaseClientDLL, FrameStageNotify, Interfaces::ClientDLL, SH_MEMBER(this, &Recorder::Hook_FrameStageNotify), false);
-  // rem hook
-}
+void Recorder::Unload() { hookFilterTime.Remove(); }
 
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");

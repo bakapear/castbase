@@ -9,11 +9,9 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-set(CMAKE_CXX_COMPILER cl)
-set(CMAKE_C_COMPILER cl)
 set(CMAKE_CXX_STANDARD 20)
 set(HL2SDK_DIR sdk2013/mp/src)
-set(SOURCEHOOK_DIR metamod-source/core/sourcehook)
+set(SUBHOOK_DIR subhook)
 set(SRC_DIR src)
 
 set(PLUGIN_NAME ${PROJECT_NAME})
@@ -28,19 +26,9 @@ endif()
 
 configure_file(${SRC_DIR}/PluginInfo.cpp.in PluginInfo.cpp @ONLY)
 
-# disable C4311 warning for sourcehook
-set_source_files_properties(${SOURCEHOOK_DIR}/sourcehook_hookmangen.cpp PROPERTIES COMPILE_FLAGS /wd4311)
-
 add_library(${PROJECT_NAME} SHARED
     ${HL2SDK_DIR}/public/vgui_controls/vgui_controls.cpp
     ${HL2SDK_DIR}/public/tier0/memoverride.cpp
-
-    ${SOURCEHOOK_DIR}/sourcehook.cpp
-    ${SOURCEHOOK_DIR}/sourcehook_hookmangen.cpp
-    ${SOURCEHOOK_DIR}/sourcehook_impl_chookidman.cpp
-    ${SOURCEHOOK_DIR}/sourcehook_impl_chookmaninfo.cpp
-    ${SOURCEHOOK_DIR}/sourcehook_impl_cproto.cpp
-    ${SOURCEHOOK_DIR}/sourcehook_impl_cvfnptr.cpp
 
     ${CMAKE_BINARY_DIR}/PluginInfo.cpp
     
@@ -62,8 +50,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${HL2SDK_DIR}/public/tier1
     ${HL2SDK_DIR}/game
     ${HL2SDK_DIR}/game/shared
-
-    ${SOURCEHOOK_DIR}
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -107,6 +93,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mathlib
     vgui_controls
 )
+
+set(SUBHOOK_STATIC ON)
+set(SUBHOOK_TESTS OFF)
+add_subdirectory(${SUBHOOK_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${SUBHOOK_DIR})
 
 add_custom_command(
 	TARGET ${PROJECT_NAME}

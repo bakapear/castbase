@@ -5,7 +5,7 @@
 #include <chrono>
 #include <string>
 
-#include "base/Hooks.h"
+#include "base/Hook.h"
 #include "base/Modules.h"
 
 struct Movie {
@@ -26,7 +26,8 @@ class Recorder : public Module {
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
 
-  void Hook_FrameStageNotify(ClientFrameStage_t curStage);
+  Hook hookFilterTime;
+  bool FilterTime(float dt);
 
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", 0);
