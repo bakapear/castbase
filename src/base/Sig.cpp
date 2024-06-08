@@ -64,6 +64,12 @@ void* FindPattern(void* start, int32_t search_length, ScanBytes* pattern) {
   return NULL;
 }
 
+void* Virtual(void* ptr, int32_t index) {
+  if (ptr == NULL) return NULL;
+  void** vtable = *((void***)ptr);
+  return vtable[index];
+}
+
 void* Scan(const char* dll, const char* pattern, uint8_t offset, uint32_t displacement) {
   MODULEINFO info;
 
