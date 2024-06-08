@@ -26,8 +26,8 @@ class Recorder : public Module {
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
 
-  Hook hookFilterTime;
-  bool FilterTime(float dt);
+  Hook FilterTimeHook;
+  bool __fastcall FilterTime(void* p, void* edx, float dt);
 
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", 0);

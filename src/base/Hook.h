@@ -1,6 +1,6 @@
 #pragma once
 
-#include <subhook.h>
+#include "../ext/LightHook.h"
 
 template <typename Instance, typename Func, typename... Args>
 class MemberPointer {
@@ -20,12 +20,44 @@ Func (Instance::*MemberPointer<Instance, Func, Args...>::_func)(Args...) = nullp
 template <typename Instance, typename Func, typename... Args>
 Instance* MemberPointer<Instance, Func, Args...>::_instance = nullptr;
 
-class Hook : public subhook::Hook {
+class Hook {
  public:
+  void Create(void* src, void* dest) { _info = CreateHook(src, dest); }
+  int Enable() { return EnableHook(&_info); }
+  int Remove() { return DisableHook(&_info); }
+
+  int Install(void* src, void* dest) {
+    Create(src, dest);
+    return Enable();
+  }
+
   template <typename Instance, typename Func, typename... Args>
-  bool InstallMember(void* src, Func (Instance::*func)(Args...), Instance* instance, subhook::HookFlags flags = subhook::HookNoFlags) {
+  int Install(void* originalFunction, Func (Instance::*func)(Args...), Instance* instance) {
     MemberPointer<Instance, Func, Args...>::SetFunction(func);
     MemberPointer<Instance, Func, Args...>::SetInstance(instance);
-    return Install(src, (void*)&MemberPointer<Instance, Func, Args...>::Forwarder, flags);
+    return Install(originalFunction, (void*)&MemberPointer<Instance, Func, Args...>::Forwarder);
   }
+
+  template <typename Func>
+  struct FnTraits;
+
+  // Normal function
+  template <typename Name, typename... Args>
+  struct FnTraits<Name (*)(Args...)> {
+    using FnType = Name (*)(Args...);
+  };
+
+  // Member function
+  template <typename Name, typename Class, typename... Args>
+  struct FnTraits<Name (Class::*)(Args...)> {
+    using FnType = Name (*)(Args...);
+  };
+
+  template <typename Func>
+  typename FnTraits<Func>::FnType GetTrampoline(Func function) {
+    return reinterpret_cast<typename FnTraits<Func>::FnType>(_info.Trampoline);
+  }
+
+ private:
+  HookInformation _info;
 };

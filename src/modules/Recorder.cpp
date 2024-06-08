@@ -1,29 +1,29 @@
 #include "Recorder.h"
 
 #include <cdll_int.h>
-#include <shaderapi/ishaderapi.h>
 #include <tier1/KeyValues.h>
 #include <toolframework/ienginetool.h>
 
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
-bool Recorder::FilterTime(float dt) {
+bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
   if (this->isRecording) {
-    // on record
+    ConMsg("Recording!\n");
+    return true;
   }
 
-  Msg("YOYOYO\n");
-
-  return true;
+  // call original
+  auto fn = FilterTimeHook.GetTrampoline(&Recorder::FilterTime);
+  return fn(p, edx, dt);
 }
 
 void Recorder::Load() {
-  void* ptr = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
-  hookFilterTime.InstallMember(ptr, &Recorder::FilterTime, this, subhook::HookFlags::HookFlagTrampoline);
+  void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
+  FilterTimeHook.Install(ptrFilterTime, &Recorder::FilterTime, this);
 }
 
-void Recorder::Unload() { hookFilterTime.Remove(); }
+void Recorder::Unload() { FilterTimeHook.Remove(); }
 
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");

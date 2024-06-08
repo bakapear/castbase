@@ -11,7 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 set(CMAKE_CXX_STANDARD 20)
 set(HL2SDK_DIR sdk2013/mp/src)
-set(SUBHOOK_DIR subhook)
 set(SRC_DIR src)
 
 set(PLUGIN_NAME ${PROJECT_NAME})
@@ -93,11 +92,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mathlib
     vgui_controls
 )
-
-set(SUBHOOK_STATIC ON)
-set(SUBHOOK_TESTS OFF)
-add_subdirectory(${SUBHOOK_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${SUBHOOK_DIR})
 
 add_custom_command(
 	TARGET ${PROJECT_NAME}
