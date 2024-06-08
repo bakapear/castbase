@@ -13,14 +13,29 @@ bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
     return true;
   }
 
-  // call original
   auto fn = FilterTimeHook.GetTrampoline(&Recorder::FilterTime);
   return fn(p, edx, dt);
+}
+
+void __cdecl Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
+  auto fn = MixPaintChannelsHook.GetTrampoline(&Recorder::MixPaintChannels);
+  return fn(endtime, isUnderwater);
+}
+
+void __fastcall Recorder::TransferSamples(void* p, void* edx, int end) {
+  auto fn = TransferSamplesHook.GetTrampoline(&Recorder::TransferSamples);
+  return fn(p, edx, end);
 }
 
 void Recorder::Load() {
   void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
   FilterTimeHook.Install(ptrFilterTime, &Recorder::FilterTime, this);
+
+  void* ptrMixPaintChannels = Sig::Scan("engine.dll", "48 8B C4 88 50 10 89 48 08 53 48 81 EC ?? ?? ?? ?? 48 89 78 E0 33 FF 4C 89 68 D0 4C 89 78 C0", 0, 0);
+  MixPaintChannelsHook.Install(ptrMixPaintChannels, &Recorder::MixPaintChannels, this);
+
+  void* ptrTransferSamples = Sig::Scan("engine.dll", "48 89 5C 24 ?? 48 89 4C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? B8 ?? ?? ?? ?? E8 ?? ?? ?? ??", 0, 0);
+  TransferSamplesHook.Install(ptrTransferSamples, &Recorder::TransferSamples, this);
 }
 
 void Recorder::Unload() { FilterTimeHook.Remove(); }
