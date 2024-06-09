@@ -6,20 +6,20 @@
 
 #include "base/Interfaces.h"
 #include "base/Sig.h"
+#include "base/fills/popen.h"
 
 void Recorder::AudioFrame() {
-  uint64_t pt = *paintedTime;
-
   float timeAheadToMix = 1.0f / (float)movie.fps;
   float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + sndLostMixTime;
 
-  int64_t numSamplesToMix = (int64_t)numFracSamplesToMix;
+  int numSamplesToMix = (int)numFracSamplesToMix;
   sndLostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
 
-  int64_t rawEndTime = pt + numSamplesToMix + sndSkippedSamples;
-  int64_t alignedEndTime = rawEndTime & ~3;
+  int pt = *paintedTime;
 
-  int64_t numSamples = alignedEndTime - pt;
+  int rawEndTime = pt + numSamplesToMix + sndSkippedSamples;
+  int alignedEndTime = rawEndTime & ~3;
+  int numSamples = alignedEndTime - pt;
 
   sndSkippedSamples = rawEndTime - alignedEndTime;
   sndNumSamples = numSamples;
@@ -61,20 +61,29 @@ void __fastcall Recorder::TransferSamples(void* p, void* edx, int end) {
     return fn(p, edx, end);
   }
 
-  WaveSample* buf = (WaveSample*)_alloca(sizeof(WaveSample) * sndNumSamples);
-
-  for (int32_t i = 0; i < sndNumSamples; i++) {
+  for (int i = 0; i < sndNumSamples; i++) {
     SndSample* sample = &paintBuffer[i];
-    buf[i] = WaveSample{(int16_t)sample->left, (int16_t)sample->right};
+    WaveSample waveSample = {(short)sample->left, (short)sample->right};
+    fwrite(&waveSample, sizeof(WaveSample), 1, movie.audio);
   }
 
-  // WavSamples: (buf, sndNumSamples)
+  // TODO: maybe this is faster. test!
+  /*
+  WaveSample* buf = (WaveSample*)_alloca(sizeof(WaveSample) * sndNumSamples);
+
+  for (int i = 0; i < sndNumSamples; i++) {
+    SndSample* sample = &paintBuffer[i];
+    buf[i] = WaveSample{(short)sample->left, (short)sample->right};
+  }
+
+  fwrite(buf, sizeof(WaveSample), sndNumSamples, pipe);
+  */
 }
 
 void Recorder::Load() {
   paintBuffer = *(SndSample**)Sig::Scan("engine.dll", "48 8B 3D ?? ?? ?? ?? 48 89 B5 ?? ?? ?? ?? 48 89 9D ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ??", 3, 4);
 
-  paintedTime = (int32_t*)Sig::Scan("engine.dll", "8B 3D ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ??", 2, 4);
+  paintedTime = (int*)Sig::Scan("engine.dll", "8B 3D ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ??", 2, 4);
 
   void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
   hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
@@ -98,6 +107,7 @@ void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConMsg("Not in a demo!\n");
 
+  movie.fps = 60;
   movie.filename = args[1];
   Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
@@ -105,14 +115,18 @@ void Recorder::recorder_start(const CCommand& args) {
   fps_max.SetValue(0);
 
   ConVarRef host_framerate("host_framerate");
-  host_framerate.SetValue(60);
-
-  this->isRecording = true;
-  this->timeStart = std::chrono::high_resolution_clock::now();
+  host_framerate.SetValue(movie.fps);
 
   this->sndLostMixTime = 0.0;
   this->sndSkippedSamples = 0;
   this->sndNumSamples = 0;
+
+  std::string cmd = "ffmpeg -f s16le -c:a pcm_s16le -ar 44100 -ac 2 -i - " + movie.filename + ".wav";
+  movie.audio = popen(cmd.c_str(), "w");
+  if (!movie.audio) return Error("Could not open ffmpeg audio pipe!");
+
+  this->isRecording = true;
+  this->timeStart = std::chrono::high_resolution_clock::now();
 }
 
 void Recorder::recorder_stop(const CCommand& args) {
@@ -122,6 +136,8 @@ void Recorder::recorder_stop(const CCommand& args) {
   host_framerate.SetValue(0);
 
   this->isRecording = false;
+
+  fclose(movie.audio);
 
   const auto endTime = std::chrono::high_resolution_clock::now();
   const auto delta = std::chrono::duration<float>(endTime - (this->timeStart));

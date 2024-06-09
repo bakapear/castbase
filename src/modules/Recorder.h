@@ -14,14 +14,19 @@
 
 struct Movie {
   std::string filename;
+
   int width;
   int height;
+
   int fps;
+
+  FILE* video;
+  FILE* audio;
 };
 
 struct SndSample {
-  int32_t left;
-  int32_t right;
+  int left;
+  int right;
 };
 
 struct WaveSample {
@@ -44,8 +49,8 @@ class Recorder : public Module {
   void AudioFrame();
   bool sndIsPainting;
   bool sndIsUnderwater;
-  int32_t sndNumSamples;
-  int32_t sndSkippedSamples;
+  int sndNumSamples;
+  int sndSkippedSamples;
   float sndLostMixTime;
 
   void RecordFrame();
@@ -61,7 +66,7 @@ class Recorder : public Module {
   SndSample* paintBuffer;
 
   // int g_paintedtime;
-  int32_t* paintedTime;
+  int* paintedTime;
 
   // bool CEngine::FilterTime( float dt )
   bool __fastcall FilterTime(void* p, void* edx, float dt);
