@@ -8,15 +8,25 @@
 #include "base/Hook.h"
 #include "base/Modules.h"
 
+#define SND_SAMPLE_RATE 44100
+#define SND_CHANNELS 2
+#define SND_BIT_DEPTH 16
+
 struct Movie {
   std::string filename;
   int width;
   int height;
+  int fps;
 };
 
 struct SndSample {
-  int left;
-  int right;
+  int32_t left;
+  int32_t right;
+};
+
+struct WaveSample {
+  short left;
+  short right;
 };
 
 class Recorder : public Module {
@@ -30,6 +40,15 @@ class Recorder : public Module {
   Movie movie;
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
+
+  void AudioFrame();
+  bool sndIsPainting;
+  bool sndIsUnderwater;
+  int32_t sndNumSamples;
+  int32_t sndSkippedSamples;
+  float sndLostMixTime;
+
+  void RecordFrame();
 
   // commands
  private:

@@ -7,18 +7,49 @@
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
+void Recorder::AudioFrame() {
+  uint64_t pt = *paintedTime;
+
+  float timeAheadToMix = 1.0f / (float)movie.fps;
+  float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + sndLostMixTime;
+
+  int64_t numSamplesToMix = (int64_t)numFracSamplesToMix;
+  sndLostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
+
+  int64_t rawEndTime = pt + numSamplesToMix + sndSkippedSamples;
+  int64_t alignedEndTime = rawEndTime & ~3;
+
+  int64_t numSamples = alignedEndTime - pt;
+
+  sndSkippedSamples = rawEndTime - alignedEndTime;
+  sndNumSamples = numSamples;
+
+  if (numSamples > 0) {
+    sndIsPainting = true;
+    Recorder::MixPaintChannels(alignedEndTime, sndIsUnderwater);
+    sndIsPainting = false;
+  }
+}
+
+void Recorder::RecordFrame() {
+  Recorder::AudioFrame();
+  // Recorder::VideoFrame();
+}
+
 bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
   if (!this->isRecording) {
     auto fn = hookFilterTime.GetTrampoline(&Recorder::FilterTime);
     return fn(p, edx, dt);
   }
 
-  ConMsg("Recording!\n");
+  Recorder::RecordFrame();
   return true;
 }
 
 void __cdecl Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
-  if (!this->isRecording) {
+  sndIsUnderwater = isUnderwater;
+
+  if (!this->isRecording || sndIsPainting) {
     auto fn = hookMixPaintChannels.GetTrampoline(&Recorder::MixPaintChannels);
     return fn(endtime, isUnderwater);
   }
@@ -30,7 +61,14 @@ void __fastcall Recorder::TransferSamples(void* p, void* edx, int end) {
     return fn(p, edx, end);
   }
 
-  // SndSample* sample = paintBuffer;
+  WaveSample* buf = (WaveSample*)_alloca(sizeof(WaveSample) * sndNumSamples);
+
+  for (int32_t i = 0; i < sndNumSamples; i++) {
+    SndSample* sample = &paintBuffer[i];
+    buf[i] = WaveSample{(int16_t)sample->left, (int16_t)sample->right};
+  }
+
+  // WavSamples: (buf, sndNumSamples)
 }
 
 void Recorder::Load() {
@@ -71,6 +109,10 @@ void Recorder::recorder_start(const CCommand& args) {
 
   this->isRecording = true;
   this->timeStart = std::chrono::high_resolution_clock::now();
+
+  this->sndLostMixTime = 0.0;
+  this->sndSkippedSamples = 0;
+  this->sndNumSamples = 0;
 }
 
 void Recorder::recorder_stop(const CCommand& args) {
