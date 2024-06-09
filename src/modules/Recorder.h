@@ -41,6 +41,9 @@ class Recorder : public Module {
   // portable_samplepair_t *g_paintbuffer;
   SndSample* paintBuffer;
 
+  // int g_paintedtime;
+  int32_t* paintedTime;
+
   // bool CEngine::FilterTime( float dt )
   bool __fastcall FilterTime(void* p, void* edx, float dt);
   Hook hookFilterTime;
