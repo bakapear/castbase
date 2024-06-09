@@ -88,7 +88,7 @@ void* Scan(const char* dll, const char* pattern, uint8_t offset, uint32_t displa
     int32_t disp = *(int32_t*)addr;
     addr += disp;
     addr += displacement;
-    return *(void**)addr;
+    return addr;
   }
 
   return addr;
