@@ -8,37 +8,50 @@
 #include "base/Sig.h"
 
 bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
-  if (this->isRecording) {
-    ConMsg("Recording!\n");
-    return true;
+  if (!this->isRecording) {
+    auto fn = hookFilterTime.GetTrampoline(&Recorder::FilterTime);
+    return fn(p, edx, dt);
   }
 
-  auto fn = FilterTimeHook.GetTrampoline(&Recorder::FilterTime);
-  return fn(p, edx, dt);
+  ConMsg("Recording!\n");
+  return true;
 }
 
 void __cdecl Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
-  auto fn = MixPaintChannelsHook.GetTrampoline(&Recorder::MixPaintChannels);
-  return fn(endtime, isUnderwater);
+  if (!this->isRecording) {
+    auto fn = hookMixPaintChannels.GetTrampoline(&Recorder::MixPaintChannels);
+    return fn(endtime, isUnderwater);
+  }
 }
 
 void __fastcall Recorder::TransferSamples(void* p, void* edx, int end) {
-  auto fn = TransferSamplesHook.GetTrampoline(&Recorder::TransferSamples);
-  return fn(p, edx, end);
+  if (!this->isRecording) {
+    auto fn = hookTransferSamples.GetTrampoline(&Recorder::TransferSamples);
+    return fn(p, edx, end);
+  }
+
+  // SndSample* sample = paintBuffer;
 }
 
 void Recorder::Load() {
+  paintBuffer = (SndSample*)Sig::Scan("engine.dll", "48 8B 3D ?? ?? ?? ?? 48 89 B5 ?? ?? ?? ?? 48 89 9D ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ??", 3, 4);
+
   void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
-  FilterTimeHook.Install(ptrFilterTime, &Recorder::FilterTime, this);
+  hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
 
   void* ptrMixPaintChannels = Sig::Scan("engine.dll", "48 8B C4 88 50 10 89 48 08 53 48 81 EC ?? ?? ?? ?? 48 89 78 E0 33 FF 4C 89 68 D0 4C 89 78 C0", 0, 0);
-  MixPaintChannelsHook.Install(ptrMixPaintChannels, &Recorder::MixPaintChannels, this);
+  hookMixPaintChannels.Install(ptrMixPaintChannels, &Recorder::MixPaintChannels, this);
 
   void* ptrTransferSamples = Sig::Scan("engine.dll", "48 89 5C 24 ?? 48 89 4C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? B8 ?? ?? ?? ?? E8 ?? ?? ?? ??", 0, 0);
-  TransferSamplesHook.Install(ptrTransferSamples, &Recorder::TransferSamples, this);
+  hookTransferSamples.Install(ptrTransferSamples, &Recorder::TransferSamples, this);
 }
 
-void Recorder::Unload() { FilterTimeHook.Remove(); }
+void Recorder::Unload() {
+  hookTransferSamples.Remove();
+  hookMixPaintChannels.Remove();
+  hookFilterTime.Remove();
+  paintBuffer = nullptr;
+}
 
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
