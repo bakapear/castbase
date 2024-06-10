@@ -36,7 +36,7 @@ void Recorder::RecordFrame() {
   // Recorder::VideoFrame();
 }
 
-bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
+bool Recorder::FilterTime(void* p, void* edx, float dt) {
   if (!this->isRecording) {
     auto fn = hookFilterTime.GetTrampoline(&Recorder::FilterTime);
     return fn(p, edx, dt);
@@ -46,7 +46,7 @@ bool __fastcall Recorder::FilterTime(void* p, void* edx, float dt) {
   return true;
 }
 
-void __cdecl Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
+void Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
   sndIsUnderwater = isUnderwater;
 
   if (!this->isRecording || sndIsPainting) {
@@ -55,7 +55,7 @@ void __cdecl Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
   }
 }
 
-void __fastcall Recorder::TransferSamples(void* p, void* edx, int end) {
+void Recorder::TransferSamples(void* p, void* edx, int end) {
   if (!this->isRecording) {
     auto fn = hookTransferSamples.GetTrampoline(&Recorder::TransferSamples);
     return fn(p, edx, end);

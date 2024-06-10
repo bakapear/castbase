@@ -69,15 +69,15 @@ class Recorder : public Module {
   int* paintedTime;
 
   // bool CEngine::FilterTime( float dt )
-  bool __fastcall FilterTime(void* p, void* edx, float dt);
+  bool FilterTime(void* p, void* edx, float dt);
   Hook hookFilterTime;
 
   // void MIX_PaintChannels( int endtime, bool bIsUnderwater )
-  void __cdecl MixPaintChannels(int endtime, bool isUnderwater);
+  void MixPaintChannels(int endtime, bool isUnderwater);
   Hook hookMixPaintChannels;
 
   // void IAudioDevice::TransferSamples( int end )
-  void __fastcall TransferSamples(void* p, void* edx, int end);
+  void TransferSamples(void* p, void* edx, int end);
   Hook hookTransferSamples;
 };
 
