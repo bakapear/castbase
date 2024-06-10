@@ -1,6 +1,7 @@
 #pragma once
 
 #include <convar.h>
+#include <d3d9.h>
 
 #include <chrono>
 #include <string>
@@ -62,15 +63,18 @@ class Recorder : public Module {
 
   // game pointers and hooks
  private:
+  // bool CEngine::FilterTime( float dt )
+  bool FilterTime(void* p, void* edx, float dt);
+  Hook hookFilterTime;
+
+  // extern IDirect3DDevice9 *g_pD3DDevice;
+  IDirect3DDevice9Ex* videoDevice;
+
   // portable_samplepair_t *g_paintbuffer;
   SndSample* paintBuffer;
 
   // int g_paintedtime;
   int* paintedTime;
-
-  // bool CEngine::FilterTime( float dt )
-  bool FilterTime(void* p, void* edx, float dt);
-  Hook hookFilterTime;
 
   // void MIX_PaintChannels( int endtime, bool bIsUnderwater )
   void MixPaintChannels(int endtime, bool isUnderwater);

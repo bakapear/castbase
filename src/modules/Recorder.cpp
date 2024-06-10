@@ -81,12 +81,15 @@ void Recorder::TransferSamples(void* p, void* edx, int end) {
 }
 
 void Recorder::Load() {
+  void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
+  hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
+
+  videoDevice = *(IDirect3DDevice9Ex**)Sig::Scan("shaderapidx9.dll", "48 8B 0D ?? ?? ?? ?? 8D 46 01 48 63 D0 4C 8D 85 ?? ?? ?? ?? 4C 8B 09 4D 8D 04 D0", 3, 4);
+  videoDevice->AddRef();
+
   paintBuffer = *(SndSample**)Sig::Scan("engine.dll", "48 8B 3D ?? ?? ?? ?? 48 89 B5 ?? ?? ?? ?? 48 89 9D ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ??", 3, 4);
 
   paintedTime = (int*)Sig::Scan("engine.dll", "8B 3D ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ??", 2, 4);
-
-  void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
-  hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
 
   void* ptrMixPaintChannels = Sig::Scan("engine.dll", "48 8B C4 88 50 10 89 48 08 53 48 81 EC ?? ?? ?? ?? 48 89 78 E0 33 FF 4C 89 68 D0 4C 89 78 C0", 0, 0);
   hookMixPaintChannels.Install(ptrMixPaintChannels, &Recorder::MixPaintChannels, this);
@@ -96,11 +99,18 @@ void Recorder::Load() {
 }
 
 void Recorder::Unload() {
-  hookTransferSamples.Remove();
-  hookMixPaintChannels.Remove();
   hookFilterTime.Remove();
-  paintedTime = nullptr;
+
+  videoDevice->Release();
+  videoDevice = nullptr;
+
   paintBuffer = nullptr;
+
+  paintedTime = nullptr;
+
+  hookMixPaintChannels.Remove();
+
+  hookTransferSamples.Remove();
 }
 
 void Recorder::recorder_start(const CCommand& args) {
