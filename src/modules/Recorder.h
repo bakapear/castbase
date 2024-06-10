@@ -57,8 +57,8 @@ class Recorder : public Module {
 
   // commands
  private:
-  CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", 0);
-  CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", 0);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", FCVAR_DONTRECORD);
 
   // game pointers and hooks
  private:
