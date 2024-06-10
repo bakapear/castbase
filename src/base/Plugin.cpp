@@ -19,24 +19,19 @@ static MyPlugin s_MyPlugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(MyPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, s_MyPlugin);
 
 bool MyPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory) {
+  PluginMsg("Loading modules...\n");
   Interfaces::Load(interfaceFactory);
-
-  Module::LoadAll();
-
   ConVar_Register();
-
-  PluginMsg("Finished loading %d modules!\n", Module::size());
+  Module::LoadAll();
+  PluginMsg("Loaded %d modules!\n", Module::size());
 
   return true;
 }
 
 void MyPlugin::Unload() {
-  PluginMsg("Unloading plugin...\n");
-
-  ConVar_Unregister();
-
+  PluginMsg("Unloading modules...\n");
   Module::UnloadAll();
+  ConVar_Unregister();
   Interfaces::Unload();
-
-  PluginMsg("Finished unloading!\n");
+  PluginMsg("Unloaded %d modules!\n", Module::size());
 }
