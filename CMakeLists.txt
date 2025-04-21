@@ -94,7 +94,6 @@ target_link_directories(${PROJECT_NAME} PRIVATE
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    legacy_stdio_definitions
     tier0
     tier1
     tier2
