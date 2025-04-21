@@ -7,7 +7,7 @@
                 "args": [
                     "/d", "/c", 
                     "\"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat\"",
-                    "x64", "10.0.17763.0", "-vcvars_ver=14.16", "&"
+                    "x64", "&"
                 ]
             }
         }
@@ -27,7 +27,7 @@
             "command": "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf_win64.exe",
             "args": [
                 "-insecure",
-                "-sw", "-w", "1280", "-h", "720", "-vulkan",
+                "-sw", "-w", "1280", "-h", "720",
                 "-insert_search_path",
                 "${workspaceFolder}/mod"
             ],

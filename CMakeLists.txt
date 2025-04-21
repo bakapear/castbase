@@ -1,4 +1,4 @@
-# "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 10.0.17763.0 -vcvars_ver=14.16
+# "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 # cmake -G Ninja -S . -B build && ninja -C build
 
 cmake_minimum_required(VERSION 3.19)
@@ -9,13 +9,14 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-set(CMAKE_CXX_STANDARD 20)
-set(HL2SDK_DIR sdk2013/mp/src)
-set(SRC_DIR src)
+set(CMAKE_CXX_STANDARD 17) # has to be 17 due to C2666 error in utlsymbol.h
+set(HL2SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013/src)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(PLUGIN_NAME ${PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
+# Git version fetch
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/ORIG_HEAD)
     include(cmake/GetGitRevisionDescription.cmake)
     get_git_head_revision(GIT_REFSPEC GIT_SHA1)
@@ -23,14 +24,16 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/ORIG_HEAD)
     set(PLUGIN_VERSION "${PROJECT_VERSION} (${GIT_SHA1_SHORT})")
 endif()
 
-configure_file(${SRC_DIR}/PluginInfo.cpp.in PluginInfo.cpp @ONLY)
+# PluginInfo
+configure_file(${SRC_DIR}/PluginInfo.cpp.in ${CMAKE_BINARY_DIR}/PluginInfo.cpp @ONLY)
 
+# Plugin source files
 add_library(${PROJECT_NAME} SHARED
     ${HL2SDK_DIR}/public/vgui_controls/vgui_controls.cpp
     ${HL2SDK_DIR}/public/tier0/memoverride.cpp
 
     ${CMAKE_BINARY_DIR}/PluginInfo.cpp
-    
+
     ${SRC_DIR}/base/Plugin.cpp
     ${SRC_DIR}/base/Interfaces.cpp
     ${SRC_DIR}/base/Modules.cpp
@@ -40,6 +43,7 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_DIR}/modules/Recorder.cpp
 )
 
+# Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${SRC_DIR}
 
@@ -51,36 +55,44 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${HL2SDK_DIR}/game/shared
 )
 
+# Compiler options
 target_compile_options(${PROJECT_NAME} PRIVATE
-    /FI ${CMAKE_SOURCE_DIR}/${SRC_DIR}/base/Common.h
+    /FI ${SRC_DIR}/base/Common.h
 )
 
+# Set MSVC runtime library to MultiThreaded
 set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
+# Compiler definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    _CRT_NO_VA_START_VALIDATION
-    SUPPRESS_INVALID_PARAMETER_NO_INFO
-    VERSION_SAFE_STEAM_API_INTERFACES
-    CLIENT_DLL
-    WIN32
-    RAD_TELEMETRY_DISABLED
-    TF2_SDK
-    TF_CLIENT_DLL
-    GLOWS_ENABLE
-    MOVE_CONSTRUCTOR_SUPPORT
-    USES_ECON_ITEMS
-    CE_DLL
+    COMPILER_MSVC
     COMPILER_MSVC64
-    WIN64
-    _WINDOWS
-    _CRT_DECLARE_NONSTDC_NAMES=1
-    _CRT_NONSTDC_NO_DEPRECATE=1
+    CLIENT_DLL
+
+    # has to be set so memoverride.cpp can build with latest Windows SDK
+    _DEBUG # so that crtdbg.h doesnt redefine malloc
+    NDEBUG # undefine debug afterwards
+
+    # useful defines from client_win64_tf.vcxproj
+    REPLAY_ENABLED
+    NO_STRING_T
+    INCLUDED_STEAM2_USERID_STRUCTS
+    USES_ECON_ITEMS
+    TF_CLIENT_DLL
+    ENABLE_GC_MATCHMAKING
+    GLOWS_ENABLE
+    USE_DYNAMIC_ASSET_LOADING
+    VOTING_ENABLED
+    NEXT_BOT
+    INVENTORY_VIA_WEBAPI
 )
 
+# Link directories
 target_link_directories(${PROJECT_NAME} PRIVATE
-    libs
+    ${HL2SDK_DIR}/lib/public/x64
 )
 
+# Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     legacy_stdio_definitions
     tier0
@@ -93,10 +105,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     vgui_controls
 )
 
+# Post-build steps
 add_custom_command(
-	TARGET ${PROJECT_NAME}
-	POST_BUILD
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/mod
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${PROJECT_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.dll"
-    COMMAND ${CMAKE_COMMAND} -E echo "Plugin { file \"addons/${PROJECT_NAME}\" }" > "${PROJECT_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.vdf"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.dll"
+    COMMAND ${CMAKE_COMMAND} -E echo "Plugin { file \"addons/${PROJECT_NAME}\" }" > "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.vdf"
 )
