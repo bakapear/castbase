@@ -36,10 +36,10 @@ void Recorder::RecordFrame() {
   // Recorder::VideoFrame();
 }
 
-bool Recorder::FilterTime(void* p, void* edx, float dt) {
+bool Recorder::FilterTime(void* p, float dt) {
   if (!this->isRecording) {
     auto fn = hookFilterTime.GetTrampoline(&Recorder::FilterTime);
-    return fn(p, edx, dt);
+    return fn(p, dt);
   }
 
   Recorder::RecordFrame();
@@ -55,10 +55,10 @@ void Recorder::MixPaintChannels(int endtime, bool isUnderwater) {
   }
 }
 
-void Recorder::TransferSamples(void* p, void* edx, int end) {
+void Recorder::TransferSamples(void* p, int end) {
   if (!this->isRecording) {
     auto fn = hookTransferSamples.GetTrampoline(&Recorder::TransferSamples);
-    return fn(p, edx, end);
+    return fn(p, end);
   }
 
   for (int i = 0; i < sndNumSamples; i++) {

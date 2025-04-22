@@ -64,7 +64,7 @@ class Recorder : public Module {
   // game pointers and hooks
  private:
   // bool CEngine::FilterTime( float dt )
-  bool FilterTime(void* p, void* edx, float dt);
+  bool FilterTime(void* p, float dt);
   Hook hookFilterTime;
 
   // extern IDirect3DDevice9 *g_pD3DDevice;
@@ -81,7 +81,7 @@ class Recorder : public Module {
   Hook hookMixPaintChannels;
 
   // void IAudioDevice::TransferSamples( int end )
-  void TransferSamples(void* p, void* edx, int end);
+  void TransferSamples(void* p, int end);
   Hook hookTransferSamples;
 };
 
