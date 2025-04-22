@@ -1,3 +1,6 @@
 [submodule "sdk2013"]
 	path = sdk2013
 	url = https://github.com/ValveSoftware/source-sdk-2013
+[submodule "minhook"]
+	path = minhook
+	url = https://github.com/TsudaKageyu/minhook.git

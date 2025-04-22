@@ -1,5 +1,6 @@
 #include "Plugin.h"
 
+#include <MinHook.h>
 #include <convar.h>
 
 #include <chrono>
@@ -19,6 +20,8 @@ static MyPlugin s_MyPlugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(MyPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, s_MyPlugin);
 
 bool MyPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory) {
+  MH_Initialize();
+
   PluginMsg("Loading modules...\n");
   Interfaces::Load(interfaceFactory);
   ConVar_Register();
@@ -29,6 +32,8 @@ bool MyPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 }
 
 void MyPlugin::Unload() {
+  MH_Uninitialize();
+
   PluginMsg("Unloading modules...\n");
   Module::UnloadAll();
   ConVar_Unregister();
