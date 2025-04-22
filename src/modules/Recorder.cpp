@@ -80,12 +80,20 @@ void Recorder::TransferSamples(void* p, int end) {
   */
 }
 
+HRESULT __stdcall Recorder::D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
+  auto fn = hookD3D9Present.GetTrampoline(&Recorder::D3D9Present);
+  return fn(p, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+}
+
 void Recorder::Load() {
   void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
   hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
 
   videoDevice = *(IDirect3DDevice9Ex**)Sig::Scan("shaderapidx9.dll", "48 8B 0D ?? ?? ?? ?? 8D 46 01 48 63 D0 4C 8D 85 ?? ?? ?? ?? 4C 8B 09 4D 8D 04 D0", 3, 4);
   videoDevice->AddRef();
+
+  void* ptrD3D9Present = Sig::Virtual(videoDevice, 17);
+  hookD3D9Present.Install(ptrD3D9Present, &Recorder::D3D9Present, this);
 
   paintBuffer = *(SndSample**)Sig::Scan("engine.dll", "48 8B 3D ?? ?? ?? ?? 48 89 B5 ?? ?? ?? ?? 48 89 9D ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ??", 3, 4);
 
