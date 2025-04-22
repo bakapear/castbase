@@ -1,7 +1,7 @@
 # "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 # cmake -G Ninja -S . -B build && ninja -C build
 
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 4.0)
 
 project(Plugin VERSION 0.0.1)
 
