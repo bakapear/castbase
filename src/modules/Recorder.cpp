@@ -160,5 +160,5 @@ void Recorder::recorder_stop(const CCommand& args) {
   const auto endTime = std::chrono::high_resolution_clock::now();
   const auto delta = std::chrono::duration<float>(endTime - (this->timeStart));
 
-  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i, 60 fps)\n", movie.filename, delta.count(), movie.width, movie.height);
+  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i, 60 fps)\n", movie.filename.c_str(), delta.count(), movie.width, movie.height);
 }
