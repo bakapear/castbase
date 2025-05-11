@@ -27,6 +27,11 @@ endif()
 # PluginInfo
 configure_file(${SRC_DIR}/PluginInfo.cpp.in ${CMAKE_BINARY_DIR}/PluginInfo.cpp @ONLY)
 
+# Plugin module source files
+file(GLOB_RECURSE MODULE_SOURCES
+    "${SRC_DIR}/modules/*.cpp"
+)
+
 # Plugin source files
 add_library(${PROJECT_NAME} SHARED
     ${HL2SDK_DIR}/public/vgui_controls/vgui_controls.cpp
@@ -39,8 +44,7 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_DIR}/base/Modules.cpp
     ${SRC_DIR}/base/Sig.cpp
 
-    ${SRC_DIR}/modules/Resolution.cpp
-    ${SRC_DIR}/modules/Recorder.cpp
+    ${MODULE_SOURCES}
 )
 
 # Minhook

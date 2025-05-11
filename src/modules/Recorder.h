@@ -1,38 +1,19 @@
 #pragma once
 
 #include <convar.h>
-#include <d3d9.h>
 
 #include <chrono>
-#include <string>
 
+#include "Recorder/AudioRecorder.h"
+#include "Recorder/VideoRecorder.h"
 #include "base/Hook.h"
 #include "base/Modules.h"
 
-#define SND_SAMPLE_RATE 44100
-#define SND_CHANNELS 2
-#define SND_BIT_DEPTH 16
-
 struct Movie {
-  std::string filename;
-
+  char filename[256];
+  int fps;
   int width;
   int height;
-
-  int fps;
-
-  FILE* video;
-  FILE* audio;
-};
-
-struct SndSample {
-  int left;
-  int right;
-};
-
-struct WaveSample {
-  short left;
-  short right;
 };
 
 class Recorder : public Module {
@@ -42,51 +23,28 @@ class Recorder : public Module {
   void Load();
   void Unload();
 
+  void Start(const char* outputFile, int fps);
+  void Stop();
+
+  void Frame();
+
  private:
   Movie movie;
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
 
-  void AudioFrame();
-  bool sndIsPainting;
-  bool sndIsUnderwater;
-  int sndNumSamples;
-  int sndSkippedSamples;
-  float sndLostMixTime;
+ private:
+  AudioRecorder Audio;
+  VideoRecorder Video;
 
-  void RecordFrame();
-
-  // commands
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", FCVAR_DONTRECORD);
 
-  // game pointers and hooks
  private:
   // bool CEngine::FilterTime( float dt )
   bool FilterTime(void* p, float dt);
   Hook hookFilterTime;
-
-  // extern IDirect3DDevice9 *g_pD3DDevice;
-  IDirect3DDevice9Ex* videoDevice;
-
-  // IDirect3DDevice9::Present( CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion )
-  HRESULT __stdcall D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
-  Hook hookD3D9Present;
-
-  // portable_samplepair_t *g_paintbuffer;
-  SndSample* paintBuffer;
-
-  // int g_paintedtime;
-  int* paintedTime;
-
-  // void MIX_PaintChannels( int endtime, bool bIsUnderwater )
-  void MixPaintChannels(int endtime, bool isUnderwater);
-  Hook hookMixPaintChannels;
-
-  // void IAudioDevice::TransferSamples( int end )
-  void TransferSamples(void* p, int end);
-  Hook hookTransferSamples;
 };
 
 inline Recorder m_Recorder;
