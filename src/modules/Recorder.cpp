@@ -61,14 +61,6 @@ void Recorder::TransferSamples(void* p, int end) {
     return fn(p, end);
   }
 
-  for (int i = 0; i < sndNumSamples; i++) {
-    SndSample* sample = &paintBuffer[i];
-    WaveSample waveSample = {(short)sample->left, (short)sample->right};
-    fwrite(&waveSample, sizeof(WaveSample), 1, movie.audio);
-  }
-
-  // TODO: maybe this is faster. test!
-  /*
   WaveSample* buf = (WaveSample*)_alloca(sizeof(WaveSample) * sndNumSamples);
 
   for (int i = 0; i < sndNumSamples; i++) {
@@ -76,8 +68,7 @@ void Recorder::TransferSamples(void* p, int end) {
     buf[i] = WaveSample{(short)sample->left, (short)sample->right};
   }
 
-  fwrite(buf, sizeof(WaveSample), sndNumSamples, pipe);
-  */
+  fwrite(buf, sizeof(WaveSample), sndNumSamples, movie.audio);
 }
 
 HRESULT __stdcall Recorder::D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
