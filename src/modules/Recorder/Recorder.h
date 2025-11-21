@@ -4,8 +4,8 @@
 
 #include <chrono>
 
-#include "Recorder/AudioRecorder.h"
-#include "Recorder/VideoRecorder.h"
+#include "AudioRecorder.h"
+#include "VideoRecorder.h"
 #include "base/Hook.h"
 #include "base/Modules.h"
 
