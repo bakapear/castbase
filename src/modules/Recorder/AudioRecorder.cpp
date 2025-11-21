@@ -88,10 +88,8 @@ void AudioRecorder::Frame() {
 
   int rawEndTime = pt + numSamplesToMix + skippedSamples;
   int alignedEndTime = rawEndTime & ~3;
-  int numSamples = alignedEndTime - pt;
-
+  numSamples = alignedEndTime - pt;
   skippedSamples = rawEndTime - alignedEndTime;
-  numSamples = numSamples;
 
   if (numSamples > 0) {
     isPainting = true;
