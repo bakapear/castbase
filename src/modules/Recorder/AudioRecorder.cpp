@@ -4,7 +4,7 @@
 #include "base/fills/popen.h"
 
 void AudioRecorder::MixPaintChannels(int endtime, bool isUnderwater) {
-  isUnderwater = isUnderwater;
+  this->isUnderwater = isUnderwater;
 
   if (!isRecording || isPainting) {
     auto fn = hookMixPaintChannels.GetTrampoline(&AudioRecorder::MixPaintChannels);
