@@ -3,12 +3,12 @@
 #include "base/Sig.h"
 #include "base/fills/popen.h"
 
-void AudioRecorder::MixPaintChannels(int endtime, bool isUnderwater) {
-  this->isUnderwater = isUnderwater;
+void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
+  this->isUnderwater = underwater;
 
   if (!isRecording || isPainting) {
     auto fn = hookMixPaintChannels.GetTrampoline(&AudioRecorder::MixPaintChannels);
-    return fn(endtime, isUnderwater);
+    return fn(endtime, underwater);
   }
 }
 
@@ -52,8 +52,8 @@ void AudioRecorder::Unload() {
   }
 }
 
-void AudioRecorder::Start(const char* outputFile, int fps) {
-  this->fps = fps;
+void AudioRecorder::Start(const char* outputFile, int outFps) {
+  this->fps = outFps;
 
   lostMixTime = 0.0;
   skippedSamples = 0;

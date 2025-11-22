@@ -23,7 +23,7 @@ class Module {
     }
   }
 
-  static int size() { return GetModuleList().size(); }
+  static size_t size() { return GetModuleList().size(); }
 
  protected:
   virtual void Load() = 0;

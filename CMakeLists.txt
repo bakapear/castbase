@@ -66,6 +66,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # Compiler options
 target_compile_options(${PROJECT_NAME} PRIVATE
     /FI ${SRC_DIR}/base/Common.h
+
+    /W4
+    /permissive-
+    /GL
+)
+
+# Link options
+target_link_options(${PROJECT_NAME} PRIVATE
+    /DEBUG:NONE
 )
 
 # Set MSVC runtime library to MultiThreaded

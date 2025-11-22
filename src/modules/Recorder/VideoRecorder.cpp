@@ -29,10 +29,10 @@ void VideoRecorder::Unload() {
   }
 }
 
-void VideoRecorder::Start(const char* outputFile, int fps, int width, int height) {
-  this->fps = fps;
-  this->width = width;
-  this->height = height;
+void VideoRecorder::Start(const char* outputFile, int outFps, int outWidth, int outHeight) {
+  this->fps = outFps;
+  this->width = outWidth;
+  this->height = outHeight;
 
   isRecording = true;
 }

@@ -1,5 +1,8 @@
 #include "Interfaces.h"
 
+enum _D3DFORMAT : int;
+typedef enum _D3DFORMAT D3DFORMAT;
+
 #include <cdll_int.h>
 #include <client/cliententitylist.h>
 #include <engine/IEngineTrace.h>
