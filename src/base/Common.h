@@ -3,6 +3,8 @@
 #include <Color.h>
 #include <dbg.h>
 
+#include "Patterns.h"
+
 extern const char* const PLUGIN_NAME;
 extern const char* const PLUGIN_VERSION;
 extern const char* const PLUGIN_DESC;

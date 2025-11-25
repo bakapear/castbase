@@ -8,10 +8,10 @@ HRESULT __stdcall VideoRecorder::D3D9Present(void* p, CONST RECT* pSourceRect, C
 }
 
 void VideoRecorder::Load() {
-  videoDevice = *(IDirect3DDevice9Ex**)Sig::Scan("shaderapidx9.dll", "48 8B 0D ?? ?? ?? ?? 8D 46 01 48 63 D0 4C 8D 85 ?? ?? ?? ?? 4C 8B 09 4D 8D 04 D0", 3, 4);
+  videoDevice = *(IDirect3DDevice9Ex**)Sig::Scan(SIGPAT_VideoDevice);
   videoDevice->AddRef();
 
-  void* ptrD3D9Present = Sig::Virtual(videoDevice, 17);
+  void* ptrD3D9Present = Sig::Virtual(videoDevice, SIGVTI_Present);
   hookD3D9Present.Install(ptrD3D9Present, &VideoRecorder::D3D9Present, this);
 }
 

@@ -29,14 +29,14 @@ void AudioRecorder::TransferSamples(void* p, int end) {
 }
 
 void AudioRecorder::Load() {
-  paintedTime = (int*)Sig::Scan("engine.dll", "8B 3D ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ??", 2, 4);
+  paintedTime = (int*)Sig::Scan(SIGPAT_PaintedTime);
 
-  paintBuffer = *(SndSample**)Sig::Scan("engine.dll", "48 8B 3D ?? ?? ?? ?? 48 89 B5 ?? ?? ?? ?? 48 89 9D ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ??", 3, 4);
+  paintBuffer = *(SndSample**)Sig::Scan(SIGPAT_PaintBuffer);
 
-  void* ptrMixPaintChannels = Sig::Scan("engine.dll", "48 8B C4 88 50 10 89 48 08 53 48 81 EC ?? ?? ?? ?? 48 89 78 E0 33 FF 4C 89 68 D0 4C 89 78 C0", 0, 0);
+  void* ptrMixPaintChannels = Sig::Scan(SIGPAT_MixPaintChannels);
   hookMixPaintChannels.Install(ptrMixPaintChannels, &AudioRecorder::MixPaintChannels, this);
 
-  void* ptrTransferSamples = Sig::Scan("engine.dll", "48 89 5C 24 ?? 48 89 4C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? B8 ?? ?? ?? ?? E8 ?? ?? ?? ??", 0, 0);
+  void* ptrTransferSamples = Sig::Scan(SIGPAT_TransferSamples);
   hookTransferSamples.Install(ptrTransferSamples, &AudioRecorder::TransferSamples, this);
 }
 

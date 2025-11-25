@@ -44,7 +44,7 @@ bool MyPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
   ConVar_Register();
 
   if (!started) {
-    ptrStart = Sig::Scan("engine.dll", "40 55 53 57 48 8D AC 24 70 FE FF FF 48 81 EC ? ? ? ? 8B DA", 0, 0);
+    ptrStart = Sig::Scan(SIGPAT_AudioSourceCacheInit);
     hookStart.Install(ptrStart, &MyPlugin::Start, this);
   } else {
     Module::LoadAll();

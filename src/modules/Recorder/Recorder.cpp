@@ -16,7 +16,7 @@ bool Recorder::FilterTime(void* p, float dt) {
 }
 
 void Recorder::Load() {
-  void* ptrFilterTime = Sig::Scan("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0);
+  void* ptrFilterTime = Sig::Scan(SIGPAT_FilterTime);
   hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
 
   Video.Load();
