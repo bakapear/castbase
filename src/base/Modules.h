@@ -10,17 +10,25 @@ class Module {
   virtual ~Module() { GetModuleList().remove(this); }
 
   static void LoadAll() {
+    PluginMsg("Loading modules...\n");
+
     for (auto mod : GetModuleList()) {
       mod->Load();
       PluginMsg("Loaded %s Module\n", mod->GetModuleName());
     }
+
+    PluginMsg("Loaded %d modules!\n", Module::size());
   }
 
   static void UnloadAll() {
+    PluginMsg("Unloading modules...\n");
+
     for (auto mod : GetModuleList()) {
       mod->Unload();
       PluginMsg("Unloaded %s Module\n", mod->GetModuleName());
     }
+
+    PluginMsg("Unloaded %d modules!\n", Module::size());
   }
 
   static size_t size() { return GetModuleList().size(); }
