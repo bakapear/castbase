@@ -25,31 +25,11 @@ void VideoRecorder::Load() {
 }
 
 void VideoRecorder::Unload() {
-  hookD3D9Present.Remove();
+  Stop();
 
   if (videoDevice) {
     videoDevice->Release();
     videoDevice = nullptr;
-  }
-
-  if (pipe) {
-    fclose(pipe);
-    pipe = nullptr;
-  }
-
-  if (contentTexture) {
-    contentTexture->Release();
-    contentTexture = nullptr;
-  }
-
-  if (contentSRV) {
-    contentSRV->Release();
-    contentSRV = nullptr;
-  }
-
-  if (stagingTexture) {
-    stagingTexture->Release();
-    stagingTexture = nullptr;
   }
 
   if (d3d11Context) {
@@ -62,20 +42,7 @@ void VideoRecorder::Unload() {
     d3d11Device = nullptr;
   }
 
-  if (sharedHandle) {
-    CloseHandle(sharedHandle);
-    sharedHandle = nullptr;
-  }
-
-  if (sharedSurface9) {
-    sharedSurface9->Release();
-    sharedSurface9 = nullptr;
-  }
-
-  if (sharedTexture9) {
-    sharedTexture9->Release();
-    sharedTexture9 = nullptr;
-  }
+  hookD3D9Present.Remove();
 }
 
 bool VideoRecorder::CreateSharedTexture(int outWidth, int outHeight) {
@@ -146,6 +113,41 @@ void VideoRecorder::Stop() {
     fclose(pipe);
     pipe = nullptr;
   }
+
+  if (renderTarget) {
+    renderTarget->Release();
+    renderTarget = nullptr;
+  }
+
+  if (contentTexture) {
+    contentTexture->Release();
+    contentTexture = nullptr;
+  }
+
+  if (contentSRV) {
+    contentSRV->Release();
+    contentSRV = nullptr;
+  }
+
+  if (stagingTexture) {
+    stagingTexture->Release();
+    stagingTexture = nullptr;
+  }
+
+  if (sharedHandle) {
+    CloseHandle(sharedHandle);
+    sharedHandle = nullptr;
+  }
+
+  if (sharedSurface9) {
+    sharedSurface9->Release();
+    sharedSurface9 = nullptr;
+  }
+
+  if (sharedTexture9) {
+    sharedTexture9->Release();
+    sharedTexture9 = nullptr;
+  }
 }
 
 void VideoRecorder::Frame() {
@@ -168,7 +170,6 @@ void VideoRecorder::Frame() {
   }
 
   d3d11Context->Unmap(stagingTexture, 0);
-  renderTarget->Release();
 
   fwrite(frameBuffer.get(), 1, frameBufferSize, pipe);
 }
