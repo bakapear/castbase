@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "base/Hook.h"
+// #include "base/Hook.h"
 
 class VideoRecorder {
  public:
@@ -47,6 +47,6 @@ class VideoRecorder {
   IDirect3DDevice9Ex* videoDevice;
 
   // IDirect3DDevice9::Present( CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion )
-  HRESULT __stdcall D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
-  Hook hookD3D9Present;
+  // HRESULT __stdcall D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+  // Hook hookD3D9Present;
 };

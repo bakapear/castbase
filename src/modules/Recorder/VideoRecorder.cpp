@@ -8,17 +8,17 @@
 #include "base/Sig.h"
 #include "base/fills/popen.h"
 
-HRESULT __stdcall VideoRecorder::D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
-  auto fn = hookD3D9Present.GetTrampoline(&VideoRecorder::D3D9Present);
-  return fn(p, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-}
+// HRESULT __stdcall VideoRecorder::D3D9Present(void* p, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
+//   auto fn = hookD3D9Present.GetTrampoline(&VideoRecorder::D3D9Present);
+//   return fn(p, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+// }
 
 void VideoRecorder::Load() {
   videoDevice = *(IDirect3DDevice9Ex**)Sig::Scan(SIGPAT_VideoDevice);
   videoDevice->AddRef();
 
-  void* ptrD3D9Present = Sig::Virtual(videoDevice, SIGVTI_Present);
-  hookD3D9Present.Install(ptrD3D9Present, &VideoRecorder::D3D9Present, this);
+  // void* ptrD3D9Present = Sig::Virtual(videoDevice, SIGVTI_Present);
+  // hookD3D9Present.Install(ptrD3D9Present, &VideoRecorder::D3D9Present, this);
 
   D3D_FEATURE_LEVEL featureLevel;
   D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &d3d11Device, &featureLevel, &d3d11Context);
@@ -42,7 +42,7 @@ void VideoRecorder::Unload() {
     d3d11Device = nullptr;
   }
 
-  hookD3D9Present.Remove();
+  // hookD3D9Present.Remove();
 }
 
 bool VideoRecorder::CreateSharedTexture(int outWidth, int outHeight) {
