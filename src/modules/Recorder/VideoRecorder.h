@@ -30,6 +30,7 @@ class VideoRecorder {
   FILE* pipe;
 
  private:
+  IDirect3DSurface9* renderTarget;
   ID3D11Device* d3d11Device;
   ID3D11DeviceContext* d3d11Context;
   ID3D11Texture2D* contentTexture;

@@ -127,6 +127,7 @@ void VideoRecorder::Start(const char* outputFile, int outFps, int outWidth, int 
   this->width = outWidth;
   this->height = outHeight;
 
+  videoDevice->GetRenderTarget(0, &renderTarget);
   CreateSharedTexture(outWidth, outHeight);
 
   char cmd[512];
@@ -149,12 +150,6 @@ void VideoRecorder::Stop() {
 
 void VideoRecorder::Frame() {
   if (!isRecording) return;
-
-  IDirect3DSurface9* renderTarget = nullptr;
-  videoDevice->GetRenderTarget(0, &renderTarget);
-
-  D3DSURFACE_DESC desc;
-  renderTarget->GetDesc(&desc);
 
   videoDevice->StretchRect(renderTarget, NULL, sharedSurface9, NULL, D3DTEXF_NONE);
   d3d11Context->CopyResource(stagingTexture, contentTexture);
