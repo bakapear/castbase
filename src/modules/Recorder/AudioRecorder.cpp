@@ -62,7 +62,7 @@ void AudioRecorder::Start(const char* outputFile, int outFps) {
   char cmd[512];
   snprintf(cmd, sizeof(cmd), "ffmpeg -f s16le -c:a pcm_s16le -ar 44100 -ac 2 -i - %s.wav", outputFile);
 
-  pipe = popen(cmd, "w");
+  pipe = popen(cmd, "wb");
   if (!pipe) return Error("Could not open ffmpeg audio pipe!");
 
   isRecording = true;
