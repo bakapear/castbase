@@ -39,6 +39,9 @@ void Recorder::Start(const char* outputFile, int fps) {
   ConVarRef fps_max("fps_max");
   fps_max.SetValue(0);
 
+  ConVarRef mat_queue_mode("mat_queue_mode");
+  mat_queue_mode.SetValue(0);
+
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(movie.fps);
 
