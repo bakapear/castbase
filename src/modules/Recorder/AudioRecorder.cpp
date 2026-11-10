@@ -1,7 +1,6 @@
 #include "AudioRecorder.h"
 
 #include "base/Sig.h"
-#include "base/fills/popen.h"
 
 void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
   this->isUnderwater = underwater;
@@ -13,7 +12,7 @@ void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
 }
 
 void AudioRecorder::TransferSamples(void* p, int end) {
-  if (!isRecording) {
+  if (!isRecording || !wavFile) {
     auto fn = hookTransferSamples.GetTrampoline(&AudioRecorder::TransferSamples);
     return fn(p, end);
   }
@@ -25,7 +24,8 @@ void AudioRecorder::TransferSamples(void* p, int end) {
     buf[i] = WaveSample{(short)sample->left, (short)sample->right};
   }
 
-  fwrite(buf, sizeof(WaveSample), numSamples, pipe);
+  size_t written = fwrite(buf, sizeof(WaveSample), numSamples, wavFile);
+  dataSize += static_cast<uint32_t>(written * sizeof(WaveSample));
 }
 
 void AudioRecorder::Load() {
@@ -41,15 +41,12 @@ void AudioRecorder::Load() {
 }
 
 void AudioRecorder::Unload() {
+  Stop();
+
   paintedTime = nullptr;
   paintBuffer = nullptr;
   hookMixPaintChannels.Remove();
   hookTransferSamples.Remove();
-
-  if (pipe) {
-    fclose(pipe);
-    pipe = nullptr;
-  }
 }
 
 void AudioRecorder::Start(const char* outputFile, int outFps) {
@@ -58,12 +55,16 @@ void AudioRecorder::Start(const char* outputFile, int outFps) {
   lostMixTime = 0.0;
   skippedSamples = 0;
   numSamples = 0;
+  dataSize = 0;
 
-  char cmd[512];
-  snprintf(cmd, sizeof(cmd), "ffmpeg -f s16le -c:a pcm_s16le -ar 44100 -ac 2 -i - %s.wav", outputFile);
+  char filename[512];
+  snprintf(filename, sizeof(filename), "%s.wav", outputFile);
 
-  pipe = popen(cmd, "wb");
-  if (!pipe) return Error("Could not open ffmpeg audio pipe!");
+  wavFile = fopen(filename, "wb");
+  if (!wavFile) return Error("Could not open WAV file!");
+
+  WavHeader header;
+  fwrite(&header, sizeof(header), 1, wavFile);
 
   isRecording = true;
 }
@@ -71,9 +72,16 @@ void AudioRecorder::Start(const char* outputFile, int outFps) {
 void AudioRecorder::Stop() {
   isRecording = false;
 
-  if (pipe) {
-    fclose(pipe);
-    pipe = nullptr;
+  if (wavFile) {
+    WavHeader header;
+    header.fileSize = 36 + dataSize;
+    header.dataSize = dataSize;
+
+    fseek(wavFile, 0, SEEK_SET);
+    fwrite(&header, sizeof(header), 1, wavFile);
+
+    fclose(wavFile);
+    wavFile = nullptr;
   }
 }
 

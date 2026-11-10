@@ -3,8 +3,24 @@
 #include "base/Hook.h"
 
 #define SND_SAMPLE_RATE 44100
-#define SND_CHANNELS 2
-#define SND_BIT_DEPTH 16
+
+#pragma pack(push, 1)
+struct WavHeader {
+  char riff[4] = {'R', 'I', 'F', 'F'};
+  uint32_t fileSize = 36;
+  char wave[4] = {'W', 'A', 'V', 'E'};
+  char fmt[4] = {'f', 'm', 't', ' '};
+  uint32_t fmtSize = 16;
+  uint16_t audioFormat = 1;
+  uint16_t channels = 2;
+  uint32_t sampleRate = SND_SAMPLE_RATE;
+  uint32_t byteRate = SND_SAMPLE_RATE * 2 * 2;
+  uint16_t blockAlign = 2 * 2;
+  uint16_t bitsPerSample = 16;
+  char data[4] = {'d', 'a', 't', 'a'};
+  uint32_t dataSize = 0;
+};
+#pragma pack(pop)
 
 struct SndSample {
   int left;
@@ -36,7 +52,8 @@ class AudioRecorder {
   int skippedSamples;
   float lostMixTime;
 
-  FILE* pipe;
+  FILE* wavFile;
+  unsigned int dataSize;
 
  private:
   // int g_paintedtime;
