@@ -17,23 +17,24 @@ class MyPlugin final : public Plugin {
   const char* GetPluginDescription() override { return PLUGIN_DESC; }
 
  private:
-  bool started = false;
-  long Start(void* p, int a, void* b);
-  void* ptrStart;
-  Hook hookStart;
+  bool init = false;
+
+  // bool CAudioSourceCache::Init( unsigned int memSize )
+  bool AudioSourceCacheInit(void* p, int a);
+  Hook hookAudioSourceCacheInit;
 };
 
 static MyPlugin s_MyPlugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(MyPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, s_MyPlugin);
 
-long MyPlugin::Start(void* p, int a, void* b) {
-  auto fn = hookStart.GetTrampoline(&MyPlugin::Start);
-  long ret = fn(p, a, b);
+bool MyPlugin::AudioSourceCacheInit(void* p, int a) {
+  auto fn = hookAudioSourceCacheInit.GetTrampoline(&MyPlugin::AudioSourceCacheInit);
+  long ret = fn(p, a);
+  hookAudioSourceCacheInit.Remove();
 
+  init = true;
   Module::LoadAll();
 
-  hookStart.Remove();
-  started = true;
   return ret;
 };
 
@@ -43,9 +44,9 @@ bool MyPlugin::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
   MH_Initialize();
   ConVar_Register();
 
-  if (!started) {
-    ptrStart = Sig::Scan(SIGPAT_AudioSourceCacheInit);
-    hookStart.Install(ptrStart, &MyPlugin::Start, this);
+  if (!init) {
+    void* ptrAudioSourceCacheInit = Sig::Scan(SIGPAT_AudioSourceCacheInit);
+    hookAudioSourceCacheInit.Install(ptrAudioSourceCacheInit, &MyPlugin::AudioSourceCacheInit, this);
   } else {
     Module::LoadAll();
   }
