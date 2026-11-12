@@ -296,9 +296,9 @@ void VulkanCapture::Unload() {
   if (hwDeviceCtx) av_buffer_unref(&hwDeviceCtx);
 }
 
-bool VulkanCapture::Start(const char* filename, int fpsArg) {
+bool VulkanCapture::Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP) {
   std::lock_guard<std::mutex> guard(mutex);
-  return StartLocked(filename, fpsArg);
+  return StartLocked(filename, movieFps, movieEncoder, movieQP);
 }
 
 void VulkanCapture::Stop() {
@@ -306,14 +306,16 @@ void VulkanCapture::Stop() {
   StopLocked();
 }
 
-bool VulkanCapture::StartLocked(const char* filename, int fpsArg) {
+bool VulkanCapture::StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP) {
   if (recording.load()) return false;
   if (!filename || !*filename) return false;
   if (swapchain == VK_NULL_HANDLE || !device || swapchainImages.empty()) return false;
 
   basePath = filename;
   if (basePath.size() < 4 || _stricmp(basePath.c_str() + basePath.size() - 4, ".mp4") != 0) basePath += ".mp4";
-  fps = fpsArg > 1000 ? 1000 : (fpsArg > 0 ? fpsArg : 0);
+  fps = movieFps > 1000 ? 1000 : (movieFps > 0 ? movieFps : 0);
+  encoder = movieEncoder;
+  qp = movieQP;
 
   if (!EnsurePresentSemaphoresLocked()) return false;
 
@@ -504,11 +506,9 @@ bool VulkanCapture::EnsureEncoder(uint32_t w, uint32_t h) {
     }
   }
 
-  const char* codecEnv = getenv("CAPTURE_CODEC");
-  const char* codecName = (codecEnv && *codecEnv) ? codecEnv : "h264_vulkan";
-  const AVCodec* codec = avcodec_find_encoder_by_name(codecName);
+  const AVCodec* codec = avcodec_find_encoder_by_name(encoder);
   if (!codec) {
-    REC_LOG("[FFmpeg] ERROR: codec '%s' not found", codecName);
+    REC_LOG("[FFmpeg] ERROR: codec '%s' not found", encoder);
     return false;
   }
 
@@ -530,7 +530,7 @@ bool VulkanCapture::EnsureEncoder(uint32_t w, uint32_t h) {
     char depthStr[16];
     _snprintf_s(depthStr, sizeof(depthStr), _TRUNCATE, "%d", asyncDepth);
     if (av_opt_set(encoderCtx->priv_data, "async_depth", depthStr, 0) < 0) {
-      REC_LOG("[FFmpeg] async_depth not supported by %s", codecName);
+      REC_LOG("[FFmpeg] async_depth not supported by %s", encoder);
     }
   }
 
@@ -544,18 +544,8 @@ bool VulkanCapture::EnsureEncoder(uint32_t w, uint32_t h) {
   encoderCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
   encoderCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-  const char* qpEnv = getenv("CAPTURE_QP");
-  const char* brEnv = getenv("CAPTURE_BITRATE");
-  char rateMode[64] = "constant QP 18";
-  if (brEnv && atoll(brEnv) > 0) {
-    encoderCtx->bit_rate = atoll(brEnv);
-    _snprintf_s(rateMode, sizeof(rateMode), _TRUNCATE, "bitrate %lld bps", (long long)encoderCtx->bit_rate);
-  } else {
-    const int qp = qpEnv ? atoi(qpEnv) : 18;
-    encoderCtx->global_quality = qp;
-    encoderCtx->bit_rate = 50000000;
-    _snprintf_s(rateMode, sizeof(rateMode), _TRUNCATE, "constant QP %d", qp);
-  }
+  encoderCtx->global_quality = qp;
+  encoderCtx->bit_rate = 50000000;  // fallback
   encoderCtx->gop_size = fps > 0 ? fps : 60;
 
   encoderCtx->color_range = AVCOL_RANGE_MPEG;

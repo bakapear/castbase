@@ -21,7 +21,7 @@ class Recorder : public Module {
   void Load();
   void Unload();
 
-  void Start(const char* outputFile, int fps);
+  void Start(const char* outputFile, int fps, const char* encoder, int qp);
   void Stop();
 
  private:
@@ -36,6 +36,10 @@ class Recorder : public Module {
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", FCVAR_DONTRECORD);
+
+  ConVar recorder_fps{"recorder_fps", "60", FCVAR_DONTRECORD, "Recording fps"};
+  ConVar recorder_encoder{"recorder_encoder", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hvec_vulkan, av1_vulkan)"};
+  ConVar recorder_qp{"recorder_qp", "18", FCVAR_DONTRECORD, "Recording quality & quantization (0-51, 0 = lossless)"};
 };
 
 inline Recorder m_Recorder;

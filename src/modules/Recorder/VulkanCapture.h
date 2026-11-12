@@ -25,7 +25,7 @@ class VulkanCapture {
   void Load();
   void Unload();
 
-  bool Start(const char* filename, int fps = 0);
+  bool Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP);
   void Stop();
 
   bool IsRecording() const { return recording.load(); }
@@ -61,7 +61,10 @@ class VulkanCapture {
   std::mutex mutex;
   std::atomic<bool> recording{false};
   std::string basePath;
+
   int fps = 0;
+  const char* encoder;
+  int qp = 0;
 
   AVBufferRef* hwDeviceCtx = nullptr;
   AVCodecContext* encoderCtx = nullptr;
@@ -77,7 +80,7 @@ class VulkanCapture {
   std::chrono::steady_clock::time_point captureStart;
   bool captureStartValid = false;
 
-  bool StartLocked(const char* filename, int fps);
+  bool StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP);
   void StopLocked();
 
   bool EnsurePresentSemaphoresLocked();

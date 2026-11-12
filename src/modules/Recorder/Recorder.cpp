@@ -15,7 +15,7 @@ void Recorder::Unload() {
   Video.Unload();
 }
 
-void Recorder::Start(const char* outputFile, int fps) {
+void Recorder::Start(const char* outputFile, int fps, const char* encoder, int qp) {
   movie.fps = fps;
   snprintf(movie.filename, sizeof(movie.filename), "%s", outputFile);
 
@@ -31,7 +31,7 @@ void Recorder::Start(const char* outputFile, int fps) {
   ConVarRef engine_no_focus_sleep("engine_no_focus_sleep");
   engine_no_focus_sleep.SetValue(0);
 
-  Video.Start(movie.filename, movie.fps);
+  Video.Start(movie.filename, movie.fps, encoder, qp);
   Audio.Start(movie.filename, movie.fps);
 
   isRecording = true;
@@ -48,13 +48,10 @@ void Recorder::Stop() {
 }
 
 void Recorder::recorder_start(const CCommand& args) {
-  if (args.ArgC() < 2) return ConMsg("Usage:  recorder_start <filename> (fps)\n");
+  if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConMsg("Not in a demo!\n");
 
-  int fps = args.ArgC() <= 3 ? atoi(args[2]) : 0;
-  if (fps <= 0) fps = 60;
-
-  Start(args[1], fps);
+  Start(args[1], recorder_fps.GetInt(), recorder_encoder.GetString(), recorder_qp.GetInt());
 
   timeStart = std::chrono::high_resolution_clock::now();
 }
