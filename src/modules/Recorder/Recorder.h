@@ -5,7 +5,7 @@
 #include <chrono>
 
 #include "AudioRecorder.h"
-#include "VideoRecorder.h"
+#include "VulkanCapture.h"
 #include "base/Hook.h"
 #include "base/Modules.h"
 
@@ -31,7 +31,7 @@ class Recorder : public Module {
 
  private:
   AudioRecorder Audio;
-  VideoRecorder Video;
+  VulkanCapture Video;
 
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);

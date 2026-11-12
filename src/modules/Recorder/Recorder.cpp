@@ -23,7 +23,7 @@ void Recorder::Start(const char* outputFile, int fps) {
   fps_max.SetValue(0);
 
   ConVarRef mat_queue_mode("mat_queue_mode");
-  mat_queue_mode.SetValue(0);
+  mat_queue_mode.SetValue(2);
 
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(movie.fps);
@@ -48,10 +48,13 @@ void Recorder::Stop() {
 }
 
 void Recorder::recorder_start(const CCommand& args) {
-  if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
+  if (args.ArgC() < 2) return ConMsg("Usage:  recorder_start <filename> (fps)\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConMsg("Not in a demo!\n");
 
-  Start(args[1], 60);
+  int fps = args.ArgC() <= 3 ? atoi(args[2]) : 0;
+  if (fps <= 0) fps = 60;
+
+  Start(args[1], fps);
 
   timeStart = std::chrono::high_resolution_clock::now();
 }

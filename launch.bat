@@ -1,5 +1,7 @@
-@echo off
+@echo off 
+:: SET "PATH=%~dp0mod\addons\ffmpeg;%PATH%"
 "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf_win64.exe" ^
 -insecure ^
 -sw -w 1280 -h 720 ^
--insert_search_path "%~dp0mod"
+-insert_search_path "%~dp0mod" ^
+-vulkan
