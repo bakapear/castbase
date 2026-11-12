@@ -2,6 +2,7 @@
 
 #include <cdll_int.h>
 
+#include "../Resolution/Resolution.h"
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
@@ -47,9 +48,25 @@ void Recorder::Stop() {
   host_framerate.SetValue(0);
 }
 
+void Recorder::recorder_init(const CCommand& args) {
+  if (Video.initialized) return ConMsg("Recorder already initialized!\n");
+
+  int width, height;
+  Interfaces::EngineClient->GetScreenSize(width, height);
+
+  Video.onInitialized = [this]() {
+    int width, height;
+    Interfaces::EngineClient->GetScreenSize(width, height);
+    m_Resolution.SetResolution(width, height - 2);
+  };
+
+  m_Resolution.SetResolution(width, height + 2);
+}
+
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConMsg("Not in a demo!\n");
+  if (!Video.initialized) return ConMsg("Recorder not initialized!\n");
 
   Start(args[1], recorder_fps.GetInt(), recorder_encoder.GetString(), recorder_qp.GetInt());
 

@@ -11,6 +11,8 @@ class Resolution : public Module {
   void Load() override {};
   void Unload() override {};
 
+  void SetResolution(int width, int height);
+
  private:
   CON_COMMAND_MEMBER_F(Resolution, "resolution_set", resolution_set, "Set the current exact windowed resolution", 0);
 };

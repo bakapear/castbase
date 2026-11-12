@@ -144,6 +144,11 @@ VkResult VKAPI_CALL VulkanCapture::CreateSwapchainKHR(VkDevice vkDevice, const V
   presentSemaphores.clear();
   if (recording.load()) EnsurePresentSemaphoresLocked();
 
+  if (!initialized) {
+    initialized = true;
+    if (onInitialized) onInitialized();
+  }
+
   return result;
 }
 

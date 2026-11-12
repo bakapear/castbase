@@ -34,8 +34,9 @@ class Recorder : public Module {
   VulkanCapture Video;
 
  private:
-  CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);
-  CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", FCVAR_DONTRECORD);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_init", recorder_init, "Initialize recorder (required at least once before recording)", FCVAR_DONTRECORD);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts recording", FCVAR_DONTRECORD);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops recording", FCVAR_DONTRECORD);
 
   ConVar recorder_fps{"recorder_fps", "60", FCVAR_DONTRECORD, "Recording fps"};
   ConVar recorder_encoder{"recorder_encoder", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hvec_vulkan, av1_vulkan)"};

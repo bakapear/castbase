@@ -84,6 +84,10 @@ void Resolution::resolution_set(const CCommand& args) {
   int width = strtol(args.Arg(1), NULL, 10);
   int height = strtol(args.Arg(2), NULL, 10);
 
+  SetResolution(width, height);
+}
+
+void Resolution::SetResolution(int width, int height) {
   SourceRes::RegisterResolution(width, height);
 
   char cmd[32];
