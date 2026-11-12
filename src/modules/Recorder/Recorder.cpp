@@ -5,20 +5,7 @@
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
-bool Recorder::FilterTime(void* p, float dt) {
-  if (!isRecording) {
-    auto fn = hookFilterTime.GetTrampoline(&Recorder::FilterTime);
-    return fn(p, dt);
-  }
-
-  Frame();
-  return true;
-}
-
 void Recorder::Load() {
-  void* ptrFilterTime = Sig::Scan(SIGPAT_FilterTime);
-  hookFilterTime.Install(ptrFilterTime, &Recorder::FilterTime, this);
-
   Video.Load();
   Audio.Load();
 }
@@ -26,15 +13,11 @@ void Recorder::Load() {
 void Recorder::Unload() {
   Audio.Unload();
   Video.Unload();
-
-  hookFilterTime.Remove();
 }
 
 void Recorder::Start(const char* outputFile, int fps) {
   movie.fps = fps;
   snprintf(movie.filename, sizeof(movie.filename), "%s", outputFile);
-
-  Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
   ConVarRef fps_max("fps_max");
   fps_max.SetValue(0);
@@ -48,7 +31,7 @@ void Recorder::Start(const char* outputFile, int fps) {
   ConVarRef engine_no_focus_sleep("engine_no_focus_sleep");
   engine_no_focus_sleep.SetValue(0);
 
-  Video.Start(movie.filename, movie.fps, movie.width, movie.height);
+  Video.Start(movie.filename, movie.fps);
   Audio.Start(movie.filename, movie.fps);
 
   isRecording = true;
@@ -78,12 +61,10 @@ void Recorder::recorder_stop(const CCommand& args) {
 
   Stop();
 
+  int width, height;
+  Interfaces::EngineClient->GetScreenSize(width, height);
+
   const auto endTime = std::chrono::high_resolution_clock::now();
   const auto delta = std::chrono::duration<float>(endTime - timeStart);
-  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename, delta.count(), movie.width, movie.height, movie.fps);
-}
-
-void Recorder::Frame() {
-  Video.Frame();
-  Audio.Frame();
+  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename, delta.count(), width, height, movie.fps);
 }

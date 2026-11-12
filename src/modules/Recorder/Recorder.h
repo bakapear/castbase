@@ -12,8 +12,6 @@
 struct Movie {
   char filename[256];
   int fps;
-  int width;
-  int height;
 };
 
 class Recorder : public Module {
@@ -25,8 +23,6 @@ class Recorder : public Module {
 
   void Start(const char* outputFile, int fps);
   void Stop();
-
-  void Frame();
 
  private:
   Movie movie;
@@ -40,11 +36,6 @@ class Recorder : public Module {
  private:
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts Recording", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops Recording", FCVAR_DONTRECORD);
-
- private:
-  // bool CEngine::FilterTime( float dt )
-  bool FilterTime(void* p, float dt);
-  Hook hookFilterTime;
 };
 
 inline Recorder m_Recorder;

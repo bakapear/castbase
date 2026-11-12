@@ -2,6 +2,34 @@
 
 #include "base/Sig.h"
 
+bool AudioRecorder::FilterTime(void* p, float dt) {
+  if (!isRecording) {
+    auto fn = hookFilterTime.GetTrampoline(&AudioRecorder::FilterTime);
+    return fn(p, dt);
+  }
+
+  float timeAheadToMix = 1.0f / (float)fps;
+  float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + lostMixTime;
+
+  int numSamplesToMix = (int)numFracSamplesToMix;
+  lostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
+
+  int pt = *paintedTime;
+
+  int rawEndTime = pt + numSamplesToMix + skippedSamples;
+  int alignedEndTime = rawEndTime & ~3;
+  numSamples = alignedEndTime - pt;
+  skippedSamples = rawEndTime - alignedEndTime;
+
+  if (numSamples > 0) {
+    isPainting = true;
+    MixPaintChannels(alignedEndTime, isUnderwater);
+    isPainting = false;
+  }
+
+  return true;
+}
+
 void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
   this->isUnderwater = underwater;
 
@@ -32,6 +60,9 @@ void AudioRecorder::Load() {
   paintedTime = (int*)Sig::Scan(SIGPAT_PaintedTime);
 
   paintBuffer = *(SndSample**)Sig::Scan(SIGPAT_PaintBuffer);
+
+  void* ptrFilterTime = Sig::Scan(SIGPAT_FilterTime);
+  hookFilterTime.Install(ptrFilterTime, &AudioRecorder::FilterTime, this);
 
   void* ptrMixPaintChannels = Sig::Scan(SIGPAT_MixPaintChannels);
   hookMixPaintChannels.Install(ptrMixPaintChannels, &AudioRecorder::MixPaintChannels, this);
@@ -82,26 +113,5 @@ void AudioRecorder::Stop() {
 
     fclose(wavFile);
     wavFile = nullptr;
-  }
-}
-
-void AudioRecorder::Frame() {
-  float timeAheadToMix = 1.0f / (float)fps;
-  float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + lostMixTime;
-
-  int numSamplesToMix = (int)numFracSamplesToMix;
-  lostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
-
-  int pt = *paintedTime;
-
-  int rawEndTime = pt + numSamplesToMix + skippedSamples;
-  int alignedEndTime = rawEndTime & ~3;
-  numSamples = alignedEndTime - pt;
-  skippedSamples = rawEndTime - alignedEndTime;
-
-  if (numSamples > 0) {
-    isPainting = true;
-    MixPaintChannels(alignedEndTime, isUnderwater);
-    isPainting = false;
   }
 }

@@ -40,8 +40,6 @@ class AudioRecorder {
   void Start(const char* outputFile, int fps);
   void Stop();
 
-  void Frame();
-
  private:
   bool isRecording;
   int fps;
@@ -61,6 +59,10 @@ class AudioRecorder {
 
   // portable_samplepair_t *g_paintbuffer;
   SndSample* paintBuffer;
+
+  // bool CEngine::FilterTime( float dt )
+  bool FilterTime(void* p, float dt);
+  Hook hookFilterTime;
 
   // void MIX_PaintChannels( int endtime, bool bIsUnderwater )
   void MixPaintChannels(int endtime, bool isUnderwater);
