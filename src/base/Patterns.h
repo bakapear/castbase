@@ -1,8 +1,8 @@
 #define _SIGPAT_EXP(module, pattern, offs, disp) module, pattern, offs, disp
 
-// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/audio/private/snd_wave_source.cpp#L2361
-// bool CAudioSourceCache::Init( unsigned int memSize )
-#define SIGPAT_AudioSourceCacheInit _SIGPAT_EXP("engine.dll", "40 55 53 57 48 8D AC 24 70 FE FF FF 48 81 EC ?? ?? ?? ?? 8B DA", 0, 0)
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/public/cdll_int.h#L592
+// virtual void PostInit() = 0;
+#define SIGVTI_PostInit 1
 
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/sys_engine.cpp#L234
 // bool CEngine::FilterTime( float dt )

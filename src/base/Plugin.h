@@ -1,6 +1,8 @@
 #pragma once
 #include <engine/iserverplugin.h>
 
+#include "Hook.h"
+
 class Plugin : public IServerPluginCallbacks {
  public:
   virtual void Pause() override {}
@@ -21,3 +23,18 @@ class Plugin : public IServerPluginCallbacks {
   virtual void OnEdictAllocated(edict_t* edict) override {}
   virtual void OnEdictFreed(const edict_t* edict) override {}
 };
+
+class MyPlugin final : public Plugin {
+ public:
+  bool Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory) override;
+  void Unload() override;
+  const char* GetPluginDescription() override { return PLUGIN_DESC; }
+
+ private:
+  // void ClientDLL::PostInit()
+  void PostInit();
+  Hook hookPostInit;
+};
+
+static MyPlugin s_MyPlugin;
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(MyPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, s_MyPlugin);
