@@ -56,6 +56,12 @@ void Recorder::Start(const char* outputFile) {
   ConVarRef engine_no_focus_sleep("engine_no_focus_sleep");
   engine_no_focus_sleep.SetValue(0);
 
+  ConVarRef snd_mix_async("snd_mix_async");
+  snd_mix_async.SetValue(0);
+
+  ConVarRef snd_noextraupdate("snd_noextraupdate");
+  snd_noextraupdate.SetValue(1);
+
   Video.Start(movie.filename, movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt());
   Audio.Start(movie.filename, movie.fps);
 

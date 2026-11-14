@@ -3,31 +3,31 @@
 #include "base/Sig.h"
 
 bool AudioRecorder::FilterTime(void* p, float dt) {
-  if (!isRecording) {
-    auto fn = hookFilterTime.GetTrampoline(&AudioRecorder::FilterTime);
-    return fn(p, dt);
+  auto fn = hookFilterTime.GetTrampoline(&AudioRecorder::FilterTime);
+  bool ret = fn(p, dt);
+
+  if (isRecording) {
+    float timeAheadToMix = 1.0f / (float)fps;
+    float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + lostMixTime;
+
+    int numSamplesToMix = (int)numFracSamplesToMix;
+    lostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
+
+    int pt = *paintedTime;
+
+    int rawEndTime = pt + numSamplesToMix + skippedSamples;
+    int alignedEndTime = rawEndTime & ~3;
+    numSamples = alignedEndTime - pt;
+    skippedSamples = rawEndTime - alignedEndTime;
+
+    if (numSamples > 0) {
+      isPainting = true;
+      MixPaintChannels(alignedEndTime, isUnderwater);
+      isPainting = false;
+    }
   }
 
-  float timeAheadToMix = 1.0f / (float)fps;
-  float numFracSamplesToMix = (timeAheadToMix * SND_SAMPLE_RATE) + lostMixTime;
-
-  int numSamplesToMix = (int)numFracSamplesToMix;
-  lostMixTime = numFracSamplesToMix - (float)numSamplesToMix;
-
-  int pt = *paintedTime;
-
-  int rawEndTime = pt + numSamplesToMix + skippedSamples;
-  int alignedEndTime = rawEndTime & ~3;
-  numSamples = alignedEndTime - pt;
-  skippedSamples = rawEndTime - alignedEndTime;
-
-  if (numSamples > 0) {
-    isPainting = true;
-    MixPaintChannels(alignedEndTime, isUnderwater);
-    isPainting = false;
-  }
-
-  return true;
+  return ret;
 }
 
 void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
