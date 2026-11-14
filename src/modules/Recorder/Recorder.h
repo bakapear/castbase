@@ -36,7 +36,6 @@ class Recorder : public Module {
   VulkanCapture Video;
 
  private:
-  CON_COMMAND_MEMBER_F(Recorder, "recorder_init", recorder_init, "Initialize recorder (required at least once before recording)", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_start", recorder_start, "Starts recording", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_stop", recorder_stop, "Stops recording", FCVAR_DONTRECORD);
   CON_COMMAND_MEMBER_F(Recorder, "recorder_run", recorder_run, "Starts demo and records a specific range", FCVAR_DONTRECORD);

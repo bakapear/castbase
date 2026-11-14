@@ -47,6 +47,8 @@ void Recorder::Unload() {
 }
 
 void Recorder::Start(const char* outputFile) {
+  if (GetModuleHandleA("shaderapivk.dll") == nullptr) return ConWarning("Recorder only supports Vulkan!\n");
+
   if (isRecording) Stop();
 
   movie.filename = EnsureExt(outputFile, ".mp4");
@@ -93,26 +95,9 @@ void Recorder::Stop() {
   ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), movie.width, movie.height, movie.fps);
 }
 
-void Recorder::recorder_init(const CCommand& args) {
-  if (Video.initialized) return ConMsg("Recorder already initialized!\n");
-  if (GetModuleHandleA("shaderapivk.dll") == nullptr) return ConWarning("Recorder only supports Vulkan!\n");
-
-  int width, height;
-  Interfaces::EngineClient->GetScreenSize(width, height);
-
-  Video.onInitialized = [this]() {
-    int width, height;
-    Interfaces::EngineClient->GetScreenSize(width, height);
-    m_Resolution.SetResolution(width, height - 2);
-  };
-
-  m_Resolution.SetResolution(width, height + 2);
-}
-
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConWarning("Not in a demo!\n");
-  if (!Video.initialized) return ConWarning("Recorder not initialized!\n");
   if (isRecording) return ConWarning("Already recording!\n");
 
   Start(args[1]);
@@ -126,7 +111,6 @@ void Recorder::recorder_stop(const CCommand& args) {
 
 void Recorder::recorder_run(const CCommand& args) {
   if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (steam id)\n");
-  if (!Video.initialized) return ConWarning("Recorder not initialized!\n");
   if (isRecording) return ConWarning("Already recording!\n");
 
   std::string filename = EnsureExt(args[1], ".mp4");

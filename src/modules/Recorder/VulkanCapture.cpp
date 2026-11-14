@@ -95,6 +95,12 @@ static uint32_t FindMemoryType(const VkPhysicalDeviceMemoryProperties& memProps,
 
 VkResult VKAPI_CALL VulkanCapture::QueuePresentKHR(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
   auto fn = hookQueuePresentKHR.GetTrampoline(&VulkanCapture::QueuePresentKHR);
+
+  if (device == VK_NULL_HANDLE) {
+    fn(queue, pPresentInfo);
+    return VK_ERROR_OUT_OF_DATE_KHR;
+  }
+
   if (!recording.load()) return fn(queue, pPresentInfo);
 
   VkSemaphore captureDone = VK_NULL_HANDLE;
@@ -148,11 +154,6 @@ VkResult VKAPI_CALL VulkanCapture::CreateSwapchainKHR(VkDevice vkDevice, const V
   retiredSemaphores.insert(retiredSemaphores.end(), presentSemaphores.begin(), presentSemaphores.end());
   presentSemaphores.clear();
   if (recording.load()) EnsurePresentSemaphoresLocked();
-
-  if (!initialized) {
-    initialized = true;
-    if (onInitialized) onInitialized();
-  }
 
   return result;
 }

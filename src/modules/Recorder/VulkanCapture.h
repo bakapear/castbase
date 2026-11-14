@@ -5,7 +5,6 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
-#include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -30,9 +29,6 @@ class VulkanCapture {
   void Stop();
 
   bool IsRecording() const { return recording.load(); }
-
-  bool initialized = false;
-  std::function<void()> onInitialized;
 
  private:
   // fake device to hook functions
