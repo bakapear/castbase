@@ -1,9 +1,5 @@
 #define _SIGPAT_EXP(module, pattern, offs, disp) module, pattern, offs, disp
 
-// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/public/cdll_int.h#L592
-// virtual void PostInit() = 0;
-#define SIGVTI_PostInit 1
-
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/cl_demoactionmanager.cpp#L193
 // void CDemoActionManager::StartPlaying( char const *demfilename )
 #define SIGPAT_StartPlaying _SIGPAT_EXP("engine.dll", "48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 81 EC 20 02 00 00 48 8B 01 48 8B FA 4C 8B F1 FF 50 20", 0, 0)

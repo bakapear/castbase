@@ -1,8 +1,6 @@
 #pragma once
 #include <engine/iserverplugin.h>
 
-#include "Hook.h"
-
 class Plugin : public IServerPluginCallbacks {
  public:
   virtual void Pause() override {}
@@ -29,11 +27,6 @@ class MyPlugin final : public Plugin {
   bool Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory) override;
   void Unload() override;
   const char* GetPluginDescription() override { return PLUGIN_DESC; }
-
- private:
-  // void ClientDLL::PostInit()
-  void PostInit();
-  Hook hookPostInit;
 };
 
 static MyPlugin s_MyPlugin;

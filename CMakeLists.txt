@@ -56,10 +56,6 @@ add_library(${PROJECT_NAME} SHARED
     ${MODULE_SOURCES}
 )
 
-# Minhook
-add_subdirectory(minhook)
-target_link_libraries(${PROJECT_NAME} PRIVATE minhook)
-
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${SRC_DIR}

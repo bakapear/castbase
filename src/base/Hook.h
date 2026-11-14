@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MinHook.h>
+#include "lib/LightHook.h"
 
 template <typename Instance, typename Func, typename... Args>
 class MemberPointer {
@@ -22,13 +22,9 @@ Instance* MemberPointer<Instance, Func, Args...>::_instance = nullptr;
 
 class Hook {
  public:
-  void Create(void* src, void* dest) {
-    MH_CreateHook(src, dest, &_trampoline);
-    _src = src;
-  }
-
-  int Enable() { return MH_EnableHook(_src); }
-  int Remove() { return MH_RemoveHook(_src); }
+  void Create(void* src, void* dest) { _info = CreateHook(src, dest); }
+  int Enable() { return EnableHook(&_info); }
+  int Remove() { return DisableHook(&_info); }
 
   int Install(void* src, void* dest) {
     Create(src, dest);
@@ -59,10 +55,9 @@ class Hook {
 
   template <typename Func>
   typename FnTraits<Func>::FnType GetTrampoline(Func function) {
-    return reinterpret_cast<typename FnTraits<Func>::FnType>(_trampoline);
+    return reinterpret_cast<typename FnTraits<Func>::FnType>(_info.Trampoline);
   }
 
  private:
-  void* _src;
-  void* _trampoline;
+  HookInformation _info;
 };
