@@ -4,6 +4,10 @@
 // virtual void PostInit() = 0;
 #define SIGVTI_PostInit 1
 
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/cl_demoactionmanager.cpp#L193
+// void CDemoActionManager::StartPlaying( char const *demfilename )
+#define SIGPAT_StartPlaying _SIGPAT_EXP("engine.dll", "48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 81 EC 20 02 00 00 48 8B 01 48 8B FA 4C 8B F1 FF 50 20", 0, 0)
+
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/sys_engine.cpp#L234
 // bool CEngine::FilterTime( float dt )
 #define SIGPAT_FilterTime _SIGPAT_EXP("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0)
