@@ -10,8 +10,10 @@
 #include "base/Modules.h"
 
 struct Movie {
-  char filename[256];
+  std::string filename;
   int fps;
+  int width;
+  int height;
 };
 
 class Recorder : public Module {
@@ -28,7 +30,6 @@ class Recorder : public Module {
   Movie movie;
   bool isRecording;
   std::chrono::high_resolution_clock::time_point timeStart;
-  std::chrono::duration<float> timeTotal;
 
  private:
   AudioRecorder Audio;

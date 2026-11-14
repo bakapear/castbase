@@ -10,6 +10,14 @@
 #define OVERRIDE_DEM "__override.dem"
 #define OVERRIDE_VDM "__override.vdm"
 
+std::string EnsureExt(const char* filename, const char* extension) {
+  std::string result = filename ? filename : "";
+  std::string ext = extension ? extension : "";
+  if (ext.empty() || result.empty()) return result;
+  if (result.size() < ext.size() || result.compare(result.size() - ext.size(), ext.size(), ext) != 0) result += ext;
+  return result;
+}
+
 void Recorder::StartPlaying(void* p, char const* demfilename) {
   auto fn = hookStartPlaying.GetTrampoline(&Recorder::StartPlaying);
 
@@ -41,8 +49,9 @@ void Recorder::Unload() {
 void Recorder::Start(const char* outputFile) {
   if (isRecording) Stop();
 
+  movie.filename = EnsureExt(outputFile, ".mp4");
   movie.fps = recorder_fps.GetInt();
-  snprintf(movie.filename, sizeof(movie.filename), "%s", outputFile);
+  Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
   ConVarRef fps_max("fps_max");
   fps_max.SetValue(0);
@@ -62,12 +71,12 @@ void Recorder::Start(const char* outputFile) {
   ConVarRef snd_noextraupdate("snd_noextraupdate");
   snd_noextraupdate.SetValue(1);
 
-  Video.Start(movie.filename, movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt());
-  Audio.Start(movie.filename, movie.fps);
+  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt());
+  Audio.Start(movie.filename.c_str(), movie.fps);
 
   isRecording = true;
   timeStart = std::chrono::high_resolution_clock::now();
-  ConColorMsg(Color(255, 255, 0, 255), "Started recording <%s>\n", movie.filename);
+  ConColorMsg(Color(255, 255, 0, 255), "Started recording <%s>\n", movie.filename.c_str());
 }
 
 void Recorder::Stop() {
@@ -80,11 +89,8 @@ void Recorder::Stop() {
   host_framerate.SetValue(0);
 
   const auto timeEnd = std::chrono::high_resolution_clock::now();
-  timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
-
-  int width, height;
-  Interfaces::EngineClient->GetScreenSize(width, height);
-  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename, timeTotal.count(), width, height, movie.fps);
+  const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
+  ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), movie.width, movie.height, movie.fps);
 }
 
 void Recorder::recorder_init(const CCommand& args) {
@@ -121,15 +127,19 @@ void Recorder::recorder_run(const CCommand& args) {
   if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (steam id)\n");
   if (!Video.initialized) return ConWarning("Recorder not initialized!\n");
   if (isRecording) return ConWarning("Already recording!\n");
-  if (!g_pFullFileSystem->FileExists(args[2], "MOD")) return ConWarning("Demo file \"%s\" not found!", args[2]);
+
+  std::string filename = EnsureExt(args[1], ".mp4");
+
+  std::string demofile = EnsureExt(args[2], ".dem");
+  if (!g_pFullFileSystem->FileExists(demofile.c_str(), "MOD")) return ConWarning("Demo file \"%s\" not found!", demofile.c_str());
 
   int tick_start = atoi(args[3]);
   int tick_end = atoi(args[4]);
 
   if (tick_start >= tick_end) return ConWarning("Invalid tick range!\n");
 
-  char player[64] = "";
-  if (args.ArgC() > 5) snprintf(player, sizeof(player), "%s", args[5]);
+  std::string player;
+  if (args.ArgC() > 5) player = args[5];
 
   FileHandle_t file = g_pFullFileSystem->Open(OVERRIDE_VDM, "w", "MOD");
   if (file == FILESYSTEM_INVALID_HANDLE) return ConWarning("Failed to create override vdm file!");
@@ -142,7 +152,7 @@ void Recorder::recorder_run(const CCommand& args) {
                        "\t\"2\" { name \"2\" factory \"PlayCommands\" starttick \"%i\" commands \"spec_mode 4; spec_player %s; recorder_start %s\" }\n"
                        "\t\"3\" { name \"3\" factory \"PlayCommands\" starttick \"%i\" commands \"recorder_stop; stopdemo\" }\n"
                        "}",
-                       tick_start, tick_start, player, args[1], tick_end);
+                       tick_start, tick_start, player.c_str(), filename.c_str(), tick_end);
 
   g_pFullFileSystem->Write(buffer, len, file);
   g_pFullFileSystem->Close(file);
