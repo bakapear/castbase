@@ -130,8 +130,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     vstdlib
     mathlib
     vgui_controls
-    d3d11
-    dxgi
 
     ${Vulkan_LIBRARIES}
 
