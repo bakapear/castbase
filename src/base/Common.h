@@ -24,3 +24,11 @@ __forceinline void PluginColorMsg(const Color& color, const char* fmt, Parameter
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   ConColorMsg(color, fmt, param...);
 }
+
+template <class... Parameters>
+__forceinline void PluginOut(const char* fmt, Parameters... param) {
+  printf("[%s] ", PLUGIN_NAME);
+  printf(fmt, param...);
+  printf("\n");
+  fflush(stdout);
+}

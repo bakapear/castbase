@@ -20,6 +20,7 @@ std::string EnsureExt(const char* filename, const char* extension) {
 
 void Recorder::StartPlaying(void* p, char const* demfilename) {
   auto fn = hookStartPlaying.GetTrampoline(&Recorder::StartPlaying);
+  PluginOut("DEMO_LAUNCH");
 
   if (g_pFullFileSystem->FileExists(OVERRIDE_VDM, "MOD")) {
     fn(p, OVERRIDE_DEM);
@@ -34,6 +35,7 @@ void Recorder::StopPlayback(void* p) {
 
   if (Interfaces::EngineClient->IsPlayingDemo()) {
     if (isRecording) Stop();
+    PluginOut("DEMO_EXIT");
   }
 
   fn(p);
@@ -93,6 +95,8 @@ void Recorder::Start(const char* outputFile) {
   isRecording = true;
   timeStart = std::chrono::high_resolution_clock::now();
   ConColorMsg(Color(255, 255, 0, 255), "Started recording <%s>\n", movie.filename.c_str());
+
+  PluginOut("RECORDER_START");
 }
 
 void Recorder::Stop() {
@@ -107,6 +111,8 @@ void Recorder::Stop() {
   const auto timeEnd = std::chrono::high_resolution_clock::now();
   const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
   ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), movie.width, movie.height, movie.fps);
+
+  PluginOut("RECORDER_STOP");
 }
 
 void Recorder::recorder_start(const CCommand& args) {
