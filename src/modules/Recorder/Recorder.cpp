@@ -95,6 +95,7 @@ void Recorder::Stop() {
 
 void Recorder::recorder_init(const CCommand& args) {
   if (Video.initialized) return ConMsg("Recorder already initialized!\n");
+  if (GetModuleHandleA("shaderapivk.dll") == nullptr) return ConWarning("Recorder only supports Vulkan!\n");
 
   int width, height;
   Interfaces::EngineClient->GetScreenSize(width, height);
