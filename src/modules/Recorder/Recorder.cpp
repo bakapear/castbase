@@ -29,11 +29,24 @@ void Recorder::StartPlaying(void* p, char const* demfilename) {
   }
 }
 
+void Recorder::StopPlayback(void* p) {
+  auto fn = hookStopPlayback.GetTrampoline(&Recorder::StopPlayback);
+
+  if (Interfaces::EngineClient->IsPlayingDemo()) {
+    if (isRecording) Stop();
+  }
+
+  fn(p);
+}
+
 void Recorder::Load() {
   if (g_pFullFileSystem->FileExists(OVERRIDE_VDM, "MOD")) g_pFullFileSystem->RemoveFile(OVERRIDE_VDM, "MOD");
 
   void* ptrStartPlaying = Sig::Scan(SIGPAT_StartPlaying);
   hookStartPlaying.Install(ptrStartPlaying, &Recorder::StartPlaying, this);
+
+  void* ptrStopPlayback = Sig::Scan(SIGPAT_StopPlayback);
+  hookStopPlayback.Install(ptrStopPlayback, &Recorder::StopPlayback, this);
 
   Video.Load();
   Audio.Load();
@@ -44,6 +57,7 @@ void Recorder::Unload() {
   Video.Unload();
 
   hookStartPlaying.Remove();
+  hookStopPlayback.Remove();
 }
 
 void Recorder::Start(const char* outputFile) {
@@ -121,7 +135,7 @@ void Recorder::recorder_run(const CCommand& args) {
   int tick_start = atoi(args[3]);
   int tick_end = atoi(args[4]);
 
-  if (tick_start >= tick_end) return ConWarning("Invalid tick range!\n");
+  if (tick_start >= tick_end - 100) return ConWarning("Invalid tick range!\n");
 
   std::string player;
   if (args.ArgC() > 5) player = args[5];

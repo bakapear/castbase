@@ -4,6 +4,10 @@
 // void CDemoActionManager::StartPlaying( char const *demfilename )
 #define SIGPAT_StartPlaying _SIGPAT_EXP("engine.dll", "48 89 5C 24 08 48 89 74 24 10 48 89 7C 24 18 41 56 48 81 EC 20 02 00 00 48 8B 01 48 8B FA 4C 8B F1 FF 50 20", 0, 0)
 
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/cl_demo.cpp#L838
+// void CDemoPlayer::StopPlayback( void )
+#define SIGPAT_StopPlayback _SIGPAT_EXP("engine.dll", "40 53 48 83 EC 30 48 8B 01 48 8B D9 FF 50 30 84 C0 0F 84 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 48 89 74 24 40 0F 29 74 24 20 48 8B 01 FF 50 20 48 8D 4B 08 E8 ?? ?? ?? ??", 0, 0)
+
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/engine/sys_engine.cpp#L234
 // bool CEngine::FilterTime( float dt )
 #define SIGPAT_FilterTime _SIGPAT_EXP("engine.dll", "40 53 48 83 EC 40 80 3D ?? ?? ?? ?? ?? 48 8B D9 0F 29 74 24 ?? 0F 28 F1 74 2B 80 3D ?? ?? ?? ?? ?? 75 22", 0, 0)

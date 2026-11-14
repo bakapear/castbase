@@ -48,6 +48,10 @@ class Recorder : public Module {
   // void CDemoActionManager::StartPlaying( char const *demfilename )
   void StartPlaying(void* p, char const* demfilename);
   Hook hookStartPlaying;
+
+  // void CDemoPlayer::StopPlayback( void )
+  void StopPlayback(void* p);
+  Hook hookStopPlayback;
 };
 
 inline Recorder m_Recorder;
