@@ -17,7 +17,7 @@ extern "C" {
 
 static const char* FFMPEG_DLLS[] = {"avutil-61.dll", "avcodec-63.dll", "avformat-63.dll"};
 
-#define REC_LOG(fmt, ...) Msg("[Recorder] " fmt "\n", ##__VA_ARGS__)
+#define REC_LOG(fmt, ...) ConWarning("[Recorder] " fmt "\n", ##__VA_ARGS__)
 
 static constexpr int kCaptureTimeScale = 90000;  // 90 kHz
 

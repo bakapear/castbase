@@ -39,6 +39,8 @@ void Recorder::Unload() {
 }
 
 void Recorder::Start(const char* outputFile) {
+  if (isRecording) Stop();
+
   movie.fps = recorder_fps.GetInt();
   snprintf(movie.filename, sizeof(movie.filename), "%s", outputFile);
 
@@ -96,35 +98,35 @@ void Recorder::recorder_init(const CCommand& args) {
 
 void Recorder::recorder_start(const CCommand& args) {
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
-  if (!Interfaces::EngineClient->IsPlayingDemo()) return ConMsg("Not in a demo!\n");
-  if (!Video.initialized) return ConMsg("Recorder not initialized!\n");
-  if (isRecording) return ConMsg("Already recording!\n");
+  if (!Interfaces::EngineClient->IsPlayingDemo()) return ConWarning("Not in a demo!\n");
+  if (!Video.initialized) return ConWarning("Recorder not initialized!\n");
+  if (isRecording) return ConWarning("Already recording!\n");
 
   Start(args[1]);
 }
 
 void Recorder::recorder_stop(const CCommand& args) {
-  if (!isRecording) return ConMsg("Not recording!\n");
+  if (!isRecording) return ConWarning("Not recording!\n");
 
   Stop();
 }
 
 void Recorder::recorder_run(const CCommand& args) {
   if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (steam id)\n");
-  if (!Video.initialized) return ConMsg("Recorder not initialized!\n");
-  if (isRecording) return ConMsg("Already recording!\n");
-  if (!g_pFullFileSystem->FileExists(args[2], "MOD")) return ConMsg("Demo file \"%s\" not found!", args[2]);
+  if (!Video.initialized) return ConWarning("Recorder not initialized!\n");
+  if (isRecording) return ConWarning("Already recording!\n");
+  if (!g_pFullFileSystem->FileExists(args[2], "MOD")) return ConWarning("Demo file \"%s\" not found!", args[2]);
 
   int tick_start = atoi(args[3]);
   int tick_end = atoi(args[4]);
 
-  if (tick_start >= tick_end) return ConMsg("Invalid tick range!\n");
+  if (tick_start >= tick_end) return ConWarning("Invalid tick range!\n");
 
   char player[64] = "";
   if (args.ArgC() > 5) snprintf(player, sizeof(player), "%s", args[5]);
 
   FileHandle_t file = g_pFullFileSystem->Open(OVERRIDE_VDM, "w", "MOD");
-  if (file == FILESYSTEM_INVALID_HANDLE) return ConMsg("Failed to create override vdm file!");
+  if (file == FILESYSTEM_INVALID_HANDLE) return ConWarning("Failed to create override vdm file!");
 
   char buffer[2048];
 

@@ -77,9 +77,7 @@ static bool RegisterResolution(int width, int height) {
 }  // namespace SourceRes
 
 void Resolution::resolution_set(const CCommand& args) {
-  if (args.ArgC() != 3) {
-    return ConMsg("Usage:  resolution_set <width> <height>\n");
-  }
+  if (args.ArgC() != 3) return ConMsg("Usage:  resolution_set <width> <height>\n");
 
   int width = strtol(args.Arg(1), NULL, 10);
   int height = strtol(args.Arg(2), NULL, 10);
