@@ -404,7 +404,7 @@ bool VulkanCapture::OpenMuxer() {
   }
 
   AVDictionary* muxOpts = nullptr;
-  av_dict_set(&muxOpts, "movflags", "frag_keyframe+empty_moov", 0);
+  av_dict_set(&muxOpts, "movflags", "faststart", 0);
 
   if (avformat_write_header(formatCtx, &muxOpts) < 0) {
     REC_LOG("[MP4] ERROR: avformat_write_header failed for %s", path.c_str());
