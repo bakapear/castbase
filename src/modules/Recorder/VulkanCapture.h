@@ -30,6 +30,8 @@ class VulkanCapture {
 
   void WriteAudio(const int16_t* interleavedStereo, int numSamples);
 
+  int GetFrameCount() { return frameIndex; }
+
  private:
   // fake device to hook functions
   VkDevice fakeDevice = VK_NULL_HANDLE;
