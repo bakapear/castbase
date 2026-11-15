@@ -1,7 +1,9 @@
 #include "Recorder.h"
 
 #include <cdll_int.h>
+#include <demofile/demoformat.h>
 #include <filesystem.h>
+#include <replay/ienginereplay.h>
 
 #include "../Resolution/Resolution.h"
 #include "base/Interfaces.h"
@@ -144,8 +146,15 @@ void Recorder::recorder_run(const CCommand& args) {
   std::string demofile = EnsureExt(args[2], ".dem");
   if (!g_pFullFileSystem->FileExists(demofile.c_str(), "MOD")) return ConWarning("Demo file \"%s\" not found!", demofile.c_str());
 
+  demoheader_t header{};
+  Interfaces::EngineReplay->ReadDemoHeader(demofile.c_str(), header);
+  int total = header.playback_ticks;
+
   int tick_start = atoi(args[3]);
   int tick_end = atoi(args[4]);
+
+  if (tick_start < 10) tick_start = 10;
+  if (tick_end > total) tick_end = total;
 
   if (tick_start >= tick_end - 100) return ConWarning("Invalid tick range!\n");
 
@@ -155,20 +164,33 @@ void Recorder::recorder_run(const CCommand& args) {
   FileHandle_t file = g_pFullFileSystem->Open(OVERRIDE_VDM, "w", "MOD");
   if (file == FILESYSTEM_INVALID_HANDLE) return ConWarning("Failed to create override vdm file!");
 
-  char buffer[2048];
+  std::string act = "";
+  if (player.length()) act += "spec_mode 4; spec_player " + player + "; ";
+  act += "recorder_start " + filename;
 
-  int len = V_snprintf(buffer, sizeof(buffer),
-                       "demoactions {\n"
-                       "\t\"1\" { name \"1\" factory \"PlayCommands\" starttick \"0\" commands \"demo_gototick %i\" }\n"
-                       "\t\"2\" { name \"2\" factory \"PlayCommands\" starttick \"%i\" commands \"spec_mode 4; spec_player %s; recorder_start %s\" }\n"
-                       "\t\"3\" { name \"3\" factory \"PlayCommands\" starttick \"%i\" commands \"recorder_stop; stopdemo\" }\n"
-                       "}",
-                       tick_start, tick_start, player.c_str(), filename.c_str(), tick_end);
+  std::string buffer = "demoactions {\n";
+  buffer += "\"1\" { name \"1\" factory \"SkipAhead\" starttick \"0\" skiptotick \"" + std::to_string(tick_start) + "\" }\n";
+  buffer += "\"1\" { name \"1\" factory \"PlayCommands\" starttick \"" + std::to_string(tick_start) + "\" commands \"" + act + "\" }\n";
 
-  g_pFullFileSystem->Write(buffer, len, file);
+  int lt = -1;
+  for (int p = 1; p < 100; p++) {
+    int t = tick_start + (tick_end - tick_start) * p / 100;
+    if (t == lt) continue;
+    lt = t;
+    buffer += "\"1\" { name \"1\" factory \"PlayCommands\" starttick \"" + std::to_string(t) + "\" commands \"recorder_progress " + std::to_string(p) + "\" }\n";
+  }
+
+  buffer += "\"1\" { name \"1\" factory \"PlayCommands\" starttick \"" + std::to_string(tick_end) + "\" commands \"recorder_progress 100; recorder_stop; stopdemo\" }\n";
+  buffer += "}";
+
+  g_pFullFileSystem->Write(buffer.data(), (int)buffer.length(), file);
   g_pFullFileSystem->Close(file);
 
   char cmd[256];
   snprintf(cmd, sizeof(cmd), "playdemo \"%s\"", args[2]);
   Interfaces::EngineClient->ClientCmd_Unrestricted(cmd);
+}
+
+void Recorder::recorder_progress(const CCommand& args) {
+  if (isRecording && args.ArgC() == 2) PluginOut("RECORDER_PROGRESS_%s", args[1]);
 }
