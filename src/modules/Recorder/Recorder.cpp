@@ -112,6 +112,10 @@ void Recorder::Stop() {
   const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
   ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), movie.width, movie.height, movie.fps);
 
+  char fullPath[MAX_PATH];
+  g_pFullFileSystem->RelativePathToFullPath(movie.filename.c_str(), nullptr, fullPath, sizeof(fullPath));
+  ConColorMsg(Color(255, 255, 0, 255), "Saved to: %s\n", fullPath);
+
   PluginOut("RECORDER_STOP");
 }
 
