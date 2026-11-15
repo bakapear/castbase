@@ -56,9 +56,11 @@ class AudioRecorder {
  private:
   // int g_paintedtime;
   int* paintedTime;
+  void* ptrPaintedTime;
 
   // portable_samplepair_t *g_paintbuffer;
   SndSample* paintBuffer;
+  void* ptrPaintBuffer;
 
   // bool CEngine::FilterTime( float dt )
   bool FilterTime(void* p, float dt);

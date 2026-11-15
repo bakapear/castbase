@@ -57,11 +57,11 @@ void AudioRecorder::TransferSamples(void* p, int end) {
 }
 
 bool AudioRecorder::Load() {
-  paintedTime = (int*)Sig::Scan(SIGPAT_PaintedTime);
-  if (!paintedTime) return false;
+  ptrPaintedTime = Sig::Scan(SIGPAT_PaintedTime);
+  if (!ptrPaintedTime) return false;
 
-  paintBuffer = *(SndSample**)Sig::Scan(SIGPAT_PaintBuffer);
-  if (!paintBuffer) return false;
+  ptrPaintBuffer = Sig::Scan(SIGPAT_PaintBuffer);
+  if (!ptrPaintBuffer) return false;
 
   void* ptrFilterTime = Sig::Scan(SIGPAT_FilterTime);
   if (!hookFilterTime.Install(ptrFilterTime, &AudioRecorder::FilterTime, this)) return false;
@@ -79,12 +79,18 @@ void AudioRecorder::Unload() {
   Stop();
 
   paintedTime = nullptr;
+  ptrPaintedTime = nullptr;
   paintBuffer = nullptr;
+  ptrPaintBuffer = nullptr;
   hookMixPaintChannels.Remove();
   hookTransferSamples.Remove();
+  hookFilterTime.Remove();
 }
 
 void AudioRecorder::Start(const char* outputFile, int outFps) {
+  if (!paintedTime) paintedTime = (int*)ptrPaintedTime;
+  if (!paintBuffer) paintBuffer = *(SndSample**)ptrPaintBuffer;
+
   this->fps = outFps;
 
   lostMixTime = 0.0;
