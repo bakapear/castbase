@@ -18,8 +18,7 @@ class DemoParticleFix : public Module {
   void Unload();
 
  private:
-  static void OnConVarChanged(IConVar *var, const char *pOldValue, float flOldValue);
-  ConVar conVarToggle{"demo_particlefix", "1", FCVAR_NONE, "Hides particles during demo skip", &DemoParticleFix::OnConVarChanged};
+  ConVar demo_particlefix{"demo_particlefix", "1", FCVAR_NONE, "Hides particles during demo skip"};
 
   CNewParticleEffect *ParticlePropertyCreate(void *p, const char *pszParticleName, ParticleAttachment_t iAttachType, int iAttachmentPoint, Vector vecOriginOffset);
   Hook hookParticlePropertyCreate;

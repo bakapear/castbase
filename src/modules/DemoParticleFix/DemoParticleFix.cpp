@@ -6,24 +6,16 @@
 #include "base/Sig.h"
 
 bool DemoParticleFix::Load() {
-  if (conVarToggle.GetBool()) {
-    void* ptrParticlePropertyCreate = Sig::Scan(SIGPAT_ParticlePropertyCreate);
-    if (!hookParticlePropertyCreate.Install(ptrParticlePropertyCreate, &DemoParticleFix::ParticlePropertyCreate, this)) return false;
-  } else {
-    hookParticlePropertyCreate.Remove();
-  }
+  void* ptrParticlePropertyCreate = Sig::Scan(SIGPAT_ParticlePropertyCreate);
+  if (!hookParticlePropertyCreate.Install(ptrParticlePropertyCreate, &DemoParticleFix::ParticlePropertyCreate, this)) return false;
 
   return true;
 }
 
-void DemoParticleFix::Unload() {
-  if (conVarToggle.GetBool()) hookParticlePropertyCreate.Remove();
-}
-
-inline void DemoParticleFix::OnConVarChanged(IConVar* pConVar, const char* pOldValue, float flOldValue) { m_DemoParticleFix.Load(); }
+void DemoParticleFix::Unload() { hookParticlePropertyCreate.Remove(); }
 
 CNewParticleEffect* DemoParticleFix::ParticlePropertyCreate(void* p, const char* pszParticleName, ParticleAttachment_t iAttachType, int iAttachmentPoint, Vector vecOriginOffset) {
-  if (Interfaces::EngineClient->IsPlayingDemo() && Interfaces::EngineClient->IsSkippingPlayback()) return NULL;
+  if (demo_particlefix.GetBool() && Interfaces::EngineClient->IsPlayingDemo() && Interfaces::EngineClient->IsSkippingPlayback()) return NULL;
 
   auto fn = hookParticlePropertyCreate.GetTrampoline(&DemoParticleFix::ParticlePropertyCreate);
   return fn(p, pszParticleName, iAttachType, iAttachmentPoint, vecOriginOffset);
