@@ -337,6 +337,7 @@ bool VulkanCapture::StartLocked(const char* filename, int movieFps, const char* 
     return false;
   }
 
+  skipFrames = 1;
   recording = true;
   return true;
 }
@@ -1020,6 +1021,11 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
 
 bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const VkPresentInfoKHR* present, VkSemaphore* outSemaphore) {
   if (imageIndex >= swapchainImages.size() || imageIndex >= presentSemaphores.size()) return false;
+
+  if (skipFrames > 0) {
+    --skipFrames;
+    return false;
+  }
 
   if (!EnsureEncoder(width, height) || !InitConverter() || !EnsureIntermediateImage(width, height)) {
     REC_LOG("ERROR: Capture failed, stopping recording");

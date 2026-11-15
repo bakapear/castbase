@@ -1,5 +1,6 @@
 #include "Recorder.h"
 
+#include <GameUI/IGameUI.h>
 #include <cdll_int.h>
 #include <demofile/demoformat.h>
 #include <filesystem.h>
@@ -43,6 +44,11 @@ void Recorder::StopPlayback(void* p) {
   fn(p);
 }
 
+void Recorder::OnGameUIActivated() {
+  // dont call original, will crash game
+  if (isRecording && recorder_escstop.GetBool()) Stop();
+}
+
 bool Recorder::Load() {
   if (g_pFullFileSystem->FileExists(OVERRIDE_VDM, "MOD")) g_pFullFileSystem->RemoveFile(OVERRIDE_VDM, "MOD");
 
@@ -51,6 +57,9 @@ bool Recorder::Load() {
 
   void* ptrStopPlayback = Sig::Scan(SIGPAT_StopPlayback);
   if (!hookStopPlayback.Install(ptrStopPlayback, &Recorder::StopPlayback, this)) return false;
+
+  void* ptrOnGameUIActivated = Sig::Virtual(Interfaces::GameUI, SIGVTI_OnGameUIActivated);
+  if (!hookOnGameUIActivated.Install(ptrOnGameUIActivated, &Recorder::OnGameUIActivated, this)) return false;
 
   if (!Video.Load()) return false;
   if (!Audio.Load()) return false;
@@ -93,6 +102,13 @@ void Recorder::Start(const char* outputFile) {
   ConVarRef snd_noextraupdate("snd_noextraupdate");
   snd_noextraupdate.SetValue(1);
 
+  if (recorder_hidehud.GetBool()) {
+    ConVarRef cl_drawhud("cl_drawhud");
+    cl_drawhud.SetValue(0);
+  }
+
+  if (recorder_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
+
   Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt());
   Audio.Start(movie.filename.c_str(), movie.fps);
 
@@ -111,6 +127,11 @@ void Recorder::Stop() {
 
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(0);
+
+  if (recorder_hidehud.GetBool()) {
+    ConVarRef cl_drawhud("cl_drawhud");
+    cl_drawhud.SetValue(1);
+  }
 
   const auto timeEnd = std::chrono::high_resolution_clock::now();
   const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);

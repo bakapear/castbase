@@ -46,6 +46,9 @@ class Recorder : public Module {
   ConVar recorder_encoder{"recorder_encoder", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hevc_vulkan, av1_vulkan)"};
   ConVar recorder_qp{"recorder_qp", "18", FCVAR_DONTRECORD, "Recording quality & quantization (0-51, 0 = lossless)"};
 
+  ConVar recorder_hidehud{"recorder_hidehud", "0", FCVAR_DONTRECORD, "Hide hud during recording"};
+  ConVar recorder_escstop{"recorder_escstop", "0", FCVAR_DONTRECORD, "Opening menu stops the recording"};
+
  private:
   // void CDemoActionManager::StartPlaying( char const *demfilename )
   void StartPlaying(void* p, char const* demfilename);
@@ -54,6 +57,10 @@ class Recorder : public Module {
   // void CDemoPlayer::StopPlayback( void )
   void StopPlayback(void* p);
   Hook hookStopPlayback;
+
+  // virtual void OnGameUIActivated() = 0;
+  void OnGameUIActivated();
+  Hook hookOnGameUIActivated;
 };
 
 inline Recorder m_Recorder;

@@ -76,6 +76,7 @@ class VulkanCapture {
   uint32_t encoderHeight = 0;
 
   int64_t frameIndex = 0;
+  int skipFrames = 0;
   int64_t lastPts = -1;
   std::chrono::steady_clock::time_point captureStart;
   bool captureStartValid = false;
