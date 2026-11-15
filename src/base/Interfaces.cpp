@@ -16,6 +16,7 @@ typedef enum _D3DFORMAT D3DFORMAT;
 #include <igameevents.h>
 #include <iprediction.h>
 #include <ivrenderview.h>
+#include <replay/ienginereplay.h>
 #include <shaderapi/ishaderapi.h>
 #include <tier1/tier1.h>
 #include <tier2/tier2.h>
@@ -47,6 +48,7 @@ IEngineTrace* Interfaces::EngineTrace = nullptr;
 ISpatialPartition* Interfaces::SpatialPartition = nullptr;
 IClientLeafSystem* Interfaces::ClientLeafSystem = nullptr;
 IClientRenderTargets* Interfaces::ClientRenderTargets = nullptr;
+IEngineReplay* Interfaces::EngineReplay = nullptr;
 
 bool Interfaces::SteamLibrariesAvailable = false;
 bool Interfaces::VGUILibrariesAvailable = false;
@@ -74,6 +76,7 @@ void Interfaces::Load(CreateInterfaceFn factory) {
   SpatialPartition = (ISpatialPartition*)factory(INTERFACEVERSION_SPATIALPARTITION, nullptr);
   ClientRenderTargets = (IClientRenderTargets*)factory(CLIENTRENDERTARGETS_INTERFACE_VERSION, nullptr);
   StaticPropMgr = (IStaticPropMgrClient*)factory(INTERFACEVERSION_STATICPROPMGR_CLIENT, nullptr);
+  EngineReplay = (IEngineReplay*)factory(ENGINE_REPLAY_INTERFACE_VERSION, nullptr);
 
   CreateInterfaceFn gameClientFactory;
   EngineTool->GetClientFactory(gameClientFactory);

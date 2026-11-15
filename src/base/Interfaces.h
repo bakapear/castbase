@@ -29,6 +29,7 @@ class ISpatialPartition;
 class IMaterialSystem;
 class IShaderAPI;
 class IClientLeafSystem;
+class IEngineReplay;
 
 class Interfaces final {
  public:
@@ -77,6 +78,8 @@ class Interfaces final {
   static IClientLeafSystem* ClientLeafSystem;
   // #include <game/client/iclientrendertargets.h>
   static IClientRenderTargets* ClientRenderTargets;
+  // #include <replay/ienginereplay.h>
+  static IEngineReplay* EngineReplay;
 
   static bool SteamLibrariesAvailable;
   static bool VGUILibrariesAvailable;
