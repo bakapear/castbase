@@ -3,6 +3,7 @@
 enum _D3DFORMAT : int;
 typedef enum _D3DFORMAT D3DFORMAT;
 
+#include <GameUI/IGameUI.h>
 #include <cdll_int.h>
 #include <client/cliententitylist.h>
 #include <engine/IEngineTrace.h>
@@ -49,6 +50,7 @@ ISpatialPartition* Interfaces::SpatialPartition = nullptr;
 IClientLeafSystem* Interfaces::ClientLeafSystem = nullptr;
 IClientRenderTargets* Interfaces::ClientRenderTargets = nullptr;
 IEngineReplay* Interfaces::EngineReplay = nullptr;
+IGameUI* Interfaces::GameUI = nullptr;
 
 bool Interfaces::SteamLibrariesAvailable = false;
 bool Interfaces::VGUILibrariesAvailable = false;
@@ -77,6 +79,10 @@ void Interfaces::Load(CreateInterfaceFn factory) {
   ClientRenderTargets = (IClientRenderTargets*)factory(CLIENTRENDERTARGETS_INTERFACE_VERSION, nullptr);
   StaticPropMgr = (IStaticPropMgrClient*)factory(INTERFACEVERSION_STATICPROPMGR_CLIENT, nullptr);
   EngineReplay = (IEngineReplay*)factory(ENGINE_REPLAY_INTERFACE_VERSION, nullptr);
+
+  static CDllDemandLoader g_GameUIDLL("GameUI");
+  CreateInterfaceFn gameUIFactory = g_GameUIDLL.GetFactory();
+  GameUI = (IGameUI*)gameUIFactory(GAMEUI_INTERFACE_VERSION, NULL);
 
   CreateInterfaceFn gameClientFactory;
   EngineTool->GetClientFactory(gameClientFactory);
