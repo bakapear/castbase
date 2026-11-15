@@ -22,7 +22,7 @@ struct AVVkFrame;
 
 class VulkanCapture {
  public:
-  void Load();
+  bool Load();
   void Unload();
 
   bool Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP);

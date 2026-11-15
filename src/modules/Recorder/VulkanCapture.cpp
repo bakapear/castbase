@@ -268,22 +268,24 @@ void VulkanCapture::DestroyFakeDevice() {
   physicalDevice = VK_NULL_HANDLE;
 }
 
-void VulkanCapture::Load() {
+bool VulkanCapture::Load() {
   ffmpegAvailable = LoadFFMpegDlls();
   if (!ffmpegAvailable) {
     REC_LOG("FFmpeg not available, recorder disabled");
-    return;  // no hooks installed, the game is untouched
+    return false;
   }
 
   CreateFakeDevice();
 
   void* fnQueuePresentKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(fakeDevice, "vkQueuePresentKHR"));
-  hookQueuePresentKHR.Install(fnQueuePresentKHR, &VulkanCapture::QueuePresentKHR, this);
+  if (!hookQueuePresentKHR.Install(fnQueuePresentKHR, &VulkanCapture::QueuePresentKHR, this)) return false;
 
   void* fnCreateSwapchainKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(fakeDevice, "vkCreateSwapchainKHR"));
-  hookCreateSwapchainKHR.Install(fnCreateSwapchainKHR, &VulkanCapture::CreateSwapchainKHR, this);
+  if (!hookCreateSwapchainKHR.Install(fnCreateSwapchainKHR, &VulkanCapture::CreateSwapchainKHR, this)) return false;
 
   DestroyFakeDevice();
+
+  return true;
 }
 
 void VulkanCapture::Unload() {

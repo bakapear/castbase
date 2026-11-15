@@ -12,12 +12,18 @@ class Module {
   static void LoadAll() {
     PluginMsg("Loading modules...\n");
 
+    int loaded = 0;
+
     for (auto mod : GetModuleList()) {
-      mod->Load();
-      PluginMsg("Loaded %s Module\n", mod->GetModuleName());
+      if (mod->Load()) {
+        loaded++;
+        PluginSuccess("+ %s\n", mod->GetModuleName());
+      } else {
+        PluginWarning("- %s\n", mod->GetModuleName());
+      }
     }
 
-    PluginMsg("Loaded %d modules!\n", Module::size());
+    PluginMsg("Loaded %i/%i modules!\n", loaded, Module::size());
   }
 
   static void UnloadAll() {
@@ -25,16 +31,16 @@ class Module {
 
     for (auto mod : GetModuleList()) {
       mod->Unload();
-      PluginMsg("Unloaded %s Module\n", mod->GetModuleName());
+      PluginWarning("- %s\n", mod->GetModuleName());
     }
 
-    PluginMsg("Unloaded %d modules!\n", Module::size());
+    PluginMsg("Unloaded %i modules!\n", Module::size());
   }
 
   static size_t size() { return GetModuleList().size(); }
 
  protected:
-  virtual void Load() = 0;
+  virtual bool Load() = 0;
   virtual void Unload() = 0;
   virtual const char* GetModuleName() = 0;
 

@@ -34,7 +34,7 @@ struct WaveSample {
 
 class AudioRecorder {
  public:
-  void Load();
+  bool Load();
   void Unload();
 
   void Start(const char* outputFile, int fps);

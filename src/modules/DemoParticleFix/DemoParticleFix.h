@@ -14,7 +14,7 @@ class DemoParticleFix : public Module {
  public:
   const char *GetModuleName() { return "DemoParticleFix"; }
 
-  void Load();
+  bool Load();
   void Unload();
 
  private:

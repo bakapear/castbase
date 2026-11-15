@@ -5,13 +5,15 @@
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
-void DemoParticleFix::Load() {
+bool DemoParticleFix::Load() {
   if (conVarToggle.GetBool()) {
     void* ptrParticlePropertyCreate = Sig::Scan(SIGPAT_ParticlePropertyCreate);
-    hookParticlePropertyCreate.Install(ptrParticlePropertyCreate, &DemoParticleFix::ParticlePropertyCreate, this);
+    if (!hookParticlePropertyCreate.Install(ptrParticlePropertyCreate, &DemoParticleFix::ParticlePropertyCreate, this)) return false;
   } else {
     hookParticlePropertyCreate.Remove();
   }
+
+  return true;
 }
 
 void DemoParticleFix::Unload() {

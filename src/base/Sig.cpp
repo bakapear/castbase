@@ -80,6 +80,8 @@ void* Scan(const char* dll, const char* pattern, uint8_t offset, uint32_t displa
 
   uint8_t* addr = (uint8_t*)FindPattern(info.lpBaseOfDll, info.SizeOfImage, &pattern_bytes);
 
+  if (!addr) return NULL;
+
   if (offset != 0) {
     addr += offset;
   }

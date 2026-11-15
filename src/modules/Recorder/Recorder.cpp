@@ -41,17 +41,19 @@ void Recorder::StopPlayback(void* p) {
   fn(p);
 }
 
-void Recorder::Load() {
+bool Recorder::Load() {
   if (g_pFullFileSystem->FileExists(OVERRIDE_VDM, "MOD")) g_pFullFileSystem->RemoveFile(OVERRIDE_VDM, "MOD");
 
   void* ptrStartPlaying = Sig::Scan(SIGPAT_StartPlaying);
-  hookStartPlaying.Install(ptrStartPlaying, &Recorder::StartPlaying, this);
+  if (!hookStartPlaying.Install(ptrStartPlaying, &Recorder::StartPlaying, this)) return false;
 
   void* ptrStopPlayback = Sig::Scan(SIGPAT_StopPlayback);
-  hookStopPlayback.Install(ptrStopPlayback, &Recorder::StopPlayback, this);
+  if (!hookStopPlayback.Install(ptrStopPlayback, &Recorder::StopPlayback, this)) return false;
 
-  Video.Load();
-  Audio.Load();
+  if (!Video.Load()) return false;
+  if (!Audio.Load()) return false;
+
+  return true;
 }
 
 void Recorder::Unload() {

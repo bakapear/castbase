@@ -27,6 +27,7 @@ class Hook {
   int Remove() { return DisableHook(&_info); }
 
   int Install(void* src, void* dest) {
+    if (!src || !dest) return 0;
     Create(src, dest);
     return Enable();
   }

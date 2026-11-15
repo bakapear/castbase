@@ -20,7 +20,7 @@ class Recorder : public Module {
  public:
   const char* GetModuleName() { return "Recorder"; }
 
-  void Load();
+  bool Load();
   void Unload();
 
   void Start(const char* outputFile);

@@ -14,11 +14,19 @@ __forceinline void PluginMsg(const char* fmt, Parameters... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   Msg(fmt, param...);
 }
+
 template <class... Parameters>
 __forceinline void PluginWarning(const char* fmt, const Parameters&... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   Warning(fmt, param...);
 }
+
+template <class... Parameters>
+__forceinline void PluginSuccess(const char* fmt, const Parameters&... param) {
+  ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
+  ConColorMsg(Color(0, 153, 0, 255), fmt, param...);
+}
+
 template <class... Parameters>
 __forceinline void PluginColorMsg(const Color& color, const char* fmt, Parameters... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);

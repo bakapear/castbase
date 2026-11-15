@@ -8,7 +8,7 @@ class Resolution : public Module {
  public:
   const char* GetModuleName() { return "Resolution"; }
 
-  void Load() override {};
+  bool Load() { return true; };
   void Unload() override {};
 
   void SetResolution(int width, int height);
