@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <thread>
 
 extern "C" {
@@ -11,7 +10,6 @@ extern "C" {
 #include <libavutil/frame.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vulkan.h>
-#include <libavutil/mem.h>
 #include <libavutil/opt.h>
 }
 
@@ -142,7 +140,6 @@ VkResult VKAPI_CALL VulkanCapture::CreateSwapchainKHR(VkDevice vkDevice, const V
   std::lock_guard<std::mutex> guard(mutex);
 
   swapchain = *pSwapchain;
-  swapchainFormat = pCreateInfo->imageFormat;
   width = pCreateInfo->imageExtent.width;
   height = pCreateInfo->imageExtent.height;
 
@@ -269,8 +266,7 @@ void VulkanCapture::DestroyFakeDevice() {
 }
 
 bool VulkanCapture::Load() {
-  ffmpegAvailable = LoadFFMpegDlls();
-  if (!ffmpegAvailable) {
+  if (!LoadFFMpegDlls()) {
     REC_LOG("FFmpeg not available, recorder disabled");
     return false;
   }

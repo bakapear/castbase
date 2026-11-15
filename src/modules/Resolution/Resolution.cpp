@@ -1,7 +1,6 @@
 #include "Resolution.h"
 
 #include <cdll_int.h>
-#include <convar.h>
 #include <modes.h>
 
 #include "base/Interfaces.h"

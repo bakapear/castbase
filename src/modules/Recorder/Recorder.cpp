@@ -1,12 +1,10 @@
 #include "Recorder.h"
 
-#include <GameUI/IGameUI.h>
 #include <cdll_int.h>
 #include <demofile/demoformat.h>
 #include <filesystem.h>
 #include <replay/ienginereplay.h>
 
-#include "../Resolution/Resolution.h"
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 

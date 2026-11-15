@@ -28,7 +28,6 @@ class VulkanCapture {
   bool Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP, int audioRate = 0);
   void Stop();
 
-  bool IsRecording() const { return recording.load(); }
   void WriteAudio(const int16_t* interleavedStereo, int numSamples);
 
  private:
@@ -51,7 +50,6 @@ class VulkanCapture {
   // real device, filled in CreateSwapchainKHR
   VkDevice device = VK_NULL_HANDLE;
   VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-  VkFormat swapchainFormat = VK_FORMAT_UNDEFINED;
   uint32_t width = 0;
   uint32_t height = 0;
   std::vector<VkImage> swapchainImages;
@@ -137,8 +135,6 @@ class VulkanCapture {
   PlaneViews GetDstPlaneViews(const AVVkFrame* vkFrame);
   void DestroyDstPlaneViews();
   void ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFrame* vkFrame, const VkPresentInfoKHR* present, VkSemaphore signalSemaphore);
-
-  bool ffmpegAvailable = false;
 
   bool EncodeAudioLocked(AVFrame* frame);
   void DrainAudioLocked();
