@@ -309,9 +309,9 @@ void VulkanCapture::Unload() {
   if (hwDeviceCtx) av_buffer_unref(&hwDeviceCtx);
 }
 
-bool VulkanCapture::Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP) {
+bool VulkanCapture::Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP, int audioRate) {
   std::lock_guard<std::mutex> guard(mutex);
-  return StartLocked(filename, movieFps, movieEncoder, movieQP);
+  return StartLocked(filename, movieFps, movieEncoder, movieQP, audioRate);
 }
 
 void VulkanCapture::Stop() {
@@ -319,7 +319,7 @@ void VulkanCapture::Stop() {
   StopLocked();
 }
 
-bool VulkanCapture::StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP) {
+bool VulkanCapture::StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP, int audioRate) {
   if (recording.load()) return false;
   if (!filename || !*filename) return false;
   if (swapchain == VK_NULL_HANDLE || !device || swapchainImages.empty()) return false;
@@ -329,6 +329,7 @@ bool VulkanCapture::StartLocked(const char* filename, int movieFps, const char* 
   fps = movieFps > 1000 ? 1000 : (movieFps > 0 ? movieFps : 0);
   encoder = movieEncoder;
   qp = movieQP;
+  audioSampleRate = audioRate > 0 ? audioRate : 0;
 
   if (!EnsurePresentSemaphoresLocked()) return false;
 
@@ -363,6 +364,80 @@ bool VulkanCapture::EnsurePresentSemaphoresLocked() {
     presentSemaphores.push_back(s);
   }
   return true;
+}
+
+static AVFrame* MakeAudioFrame(AVCodecContext* ctx, const int16_t* src, int numSamples, int64_t pts) {
+  AVFrame* f = av_frame_alloc();
+  if (!f) return nullptr;
+
+  f->format = AV_SAMPLE_FMT_FLTP;
+  f->nb_samples = ctx->frame_size > 0 ? ctx->frame_size : numSamples;
+  f->sample_rate = ctx->sample_rate;
+  av_channel_layout_copy(&f->ch_layout, &ctx->ch_layout);
+  if (av_frame_get_buffer(f, 0) < 0) {
+    av_frame_free(&f);
+    return nullptr;
+  }
+
+  for (int c = 0; c < 2; ++c) {
+    float* dst = reinterpret_cast<float*>(f->data[c]);
+    for (int i = 0; i < f->nb_samples; ++i) dst[i] = i < numSamples ? src[i * 2 + c] / 32768.0f : 0.0f;
+  }
+  if (numSamples < f->nb_samples) f->nb_samples = numSamples;  // short last frame
+
+  f->pts = pts;
+  return f;
+}
+
+bool VulkanCapture::EncodeAudioLocked(AVFrame* frame) {
+  if (!audioCtx || !audioStream || !audioPacket || !formatCtx) return false;
+  if (avcodec_send_frame(audioCtx, frame) < 0) return false;
+
+  int r;
+  while ((r = avcodec_receive_packet(audioCtx, audioPacket)) >= 0) {
+    av_packet_rescale_ts(audioPacket, audioCtx->time_base, audioStream->time_base);
+    audioPacket->stream_index = audioStream->index;
+    if (av_interleaved_write_frame(formatCtx, audioPacket) < 0) {
+      av_packet_unref(audioPacket);
+      return false;
+    }
+  }
+  return r == AVERROR(EAGAIN) || r == AVERROR_EOF;
+}
+
+void VulkanCapture::WriteAudio(const int16_t* samples, int numSamples) {
+  if (!samples || numSamples <= 0 || !audioEnabled.load()) return;
+
+  std::lock_guard<std::mutex> guard(audioMutex);
+  audioQueue.insert(audioQueue.end(), samples, samples + (size_t)numSamples * 2);
+}
+
+void VulkanCapture::DrainAudioLocked() {
+  if (!audioEnabled.load()) return;
+
+  std::vector<int16_t> incoming;
+  {
+    std::lock_guard<std::mutex> guard(audioMutex);
+    incoming.swap(audioQueue);
+  }
+  if (incoming.empty() || !audioCtx || !audioStream) return;
+  if (skipFrames > 0) return;
+
+  audioPending.insert(audioPending.end(), incoming.begin(), incoming.end());
+
+  const int frameSize = audioCtx->frame_size > 0 ? audioCtx->frame_size : 1024;
+  const size_t chunk = (size_t)frameSize * 2;
+
+  size_t pos = 0;
+  while (audioPending.size() - pos >= chunk) {
+    AVFrame* f = MakeAudioFrame(audioCtx, audioPending.data() + pos, frameSize, audioSamplesSent);
+    if (!f) break;
+    audioSamplesSent += frameSize;
+    EncodeAudioLocked(f);
+    av_frame_free(&f);
+    pos += chunk;
+  }
+  audioPending.erase(audioPending.begin(), audioPending.begin() + pos);
 }
 
 // create mp4 container and write header
@@ -404,12 +479,55 @@ bool VulkanCapture::OpenMuxer() {
     }
   }
 
+  audioStream = nullptr;
+  audioSamplesSent = 0;
+  audioPending.clear();
+  if (audioSampleRate > 0) {
+    const AVCodec* aac = avcodec_find_encoder(AV_CODEC_ID_AAC);
+    audioCtx = aac ? avcodec_alloc_context3(aac) : nullptr;
+    if (audioCtx) {
+      audioCtx->sample_fmt = AV_SAMPLE_FMT_FLTP;
+      audioCtx->sample_rate = audioSampleRate;
+      av_channel_layout_default(&audioCtx->ch_layout, 2);
+      audioCtx->bit_rate = 192000;
+      audioCtx->time_base = {1, audioSampleRate};
+      audioCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+      if (avcodec_open2(audioCtx, aac, nullptr) < 0) {
+        avcodec_free_context(&audioCtx);
+      } else if ((audioStream = avformat_new_stream(formatCtx, nullptr)) == nullptr || avcodec_parameters_from_context(audioStream->codecpar, audioCtx) < 0) {
+        avcodec_free_context(&audioCtx);
+        audioStream = nullptr;
+      } else {
+        audioStream->time_base = {1, audioSampleRate};
+        audioPacket = av_packet_alloc();
+      }
+    }
+    if (!audioCtx || !audioStream || !audioPacket) {
+      REC_LOG("[MP4] WARNING: AAC encoder unavailable, recording without audio");
+      avcodec_free_context(&audioCtx);
+      av_packet_free(&audioPacket);
+      audioStream = nullptr;
+    }
+    if (audioCtx && audioStream && audioPacket) {
+      {
+        std::lock_guard<std::mutex> guard(audioMutex);
+        audioQueue.clear();
+      }
+      audioEnabled = true;
+    }
+  }
+
   AVDictionary* muxOpts = nullptr;
   av_dict_set(&muxOpts, "movflags", "faststart", 0);
 
   if (avformat_write_header(formatCtx, &muxOpts) < 0) {
     REC_LOG("[MP4] ERROR: avformat_write_header failed for %s", path.c_str());
     av_dict_free(&muxOpts);
+    audioEnabled = false;
+    avcodec_free_context(&audioCtx);
+    av_packet_free(&audioPacket);
+    audioStream = nullptr;
     if (formatCtx->pb) avio_closep(&formatCtx->pb);
     avformat_free_context(formatCtx);
     formatCtx = nullptr;
@@ -422,6 +540,25 @@ bool VulkanCapture::OpenMuxer() {
 }
 
 void VulkanCapture::CloseMuxer() {
+  if (formatCtx && audioCtx && audioStream) {
+    DrainAudioLocked();
+    audioEnabled = false;
+    const int leftover = (int)(audioPending.size() / 2);
+    if (leftover > 0) {
+      if (AVFrame* f = MakeAudioFrame(audioCtx, audioPending.data(), leftover, audioSamplesSent)) {
+        EncodeAudioLocked(f);
+        av_frame_free(&f);
+      }
+    }
+    EncodeAudioLocked(nullptr);
+  }
+  audioEnabled = false;
+  avcodec_free_context(&audioCtx);
+  av_packet_free(&audioPacket);
+  audioStream = nullptr;
+  audioPending.clear();
+  audioSamplesSent = 0;
+
   if (!formatCtx) return;
 
   int ret = av_write_trailer(formatCtx);
@@ -1021,6 +1158,8 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
 
 bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const VkPresentInfoKHR* present, VkSemaphore* outSemaphore) {
   if (imageIndex >= swapchainImages.size() || imageIndex >= presentSemaphores.size()) return false;
+
+  DrainAudioLocked();
 
   if (skipFrames > 0) {
     --skipFrames;

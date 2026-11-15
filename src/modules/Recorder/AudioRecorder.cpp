@@ -1,5 +1,6 @@
 #include "AudioRecorder.h"
 
+#include "VulkanCapture.h"
 #include "base/Sig.h"
 
 bool AudioRecorder::FilterTime(void* p, float dt) {
@@ -40,10 +41,12 @@ void AudioRecorder::MixPaintChannels(int endtime, bool underwater) {
 }
 
 void AudioRecorder::TransferSamples(void* p, int end) {
-  if (!isRecording || !wavFile) {
+  if (!isRecording || !video) {
     auto fn = hookTransferSamples.GetTrampoline(&AudioRecorder::TransferSamples);
     return fn(p, end);
   }
+
+  if (numSamples <= 0) return;
 
   WaveSample* buf = (WaveSample*)_alloca(sizeof(WaveSample) * numSamples);
 
@@ -52,8 +55,7 @@ void AudioRecorder::TransferSamples(void* p, int end) {
     buf[i] = WaveSample{(short)sample->left, (short)sample->right};
   }
 
-  size_t written = fwrite(buf, sizeof(WaveSample), numSamples, wavFile);
-  dataSize += static_cast<uint32_t>(written * sizeof(WaveSample));
+  video->WriteAudio(reinterpret_cast<const int16_t*>(buf), numSamples);
 }
 
 bool AudioRecorder::Load() {
@@ -87,41 +89,21 @@ void AudioRecorder::Unload() {
   hookFilterTime.Remove();
 }
 
-void AudioRecorder::Start(const char* outputFile, int outFps) {
+void AudioRecorder::Start(int outFps, VulkanCapture* target) {
   if (!paintedTime) paintedTime = (int*)ptrPaintedTime;
   if (!paintBuffer) paintBuffer = *(SndSample**)ptrPaintBuffer;
 
   this->fps = outFps;
+  this->video = target;
 
   lostMixTime = 0.0;
   skippedSamples = 0;
   numSamples = 0;
-  dataSize = 0;
-
-  char filename[512];
-  snprintf(filename, sizeof(filename), "%s.wav", outputFile);
-
-  wavFile = fopen(filename, "wb");
-  if (!wavFile) return Error("Could not open WAV file!");
-
-  WavHeader header;
-  fwrite(&header, sizeof(header), 1, wavFile);
 
   isRecording = true;
 }
 
 void AudioRecorder::Stop() {
   isRecording = false;
-
-  if (wavFile) {
-    WavHeader header;
-    header.fileSize = 36 + dataSize;
-    header.dataSize = dataSize;
-
-    fseek(wavFile, 0, SEEK_SET);
-    fwrite(&header, sizeof(header), 1, wavFile);
-
-    fclose(wavFile);
-    wavFile = nullptr;
-  }
+  video = nullptr;
 }

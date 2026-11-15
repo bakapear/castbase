@@ -25,10 +25,11 @@ class VulkanCapture {
   bool Load();
   void Unload();
 
-  bool Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP);
+  bool Start(const char* filename, int movieFps, const char* movieEncoder, int movieQP, int audioRate = 0);
   void Stop();
 
   bool IsRecording() const { return recording.load(); }
+  void WriteAudio(const int16_t* interleavedStereo, int numSamples);
 
  private:
   // fake device to hook functions
@@ -81,7 +82,7 @@ class VulkanCapture {
   std::chrono::steady_clock::time_point captureStart;
   bool captureStartValid = false;
 
-  bool StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP);
+  bool StartLocked(const char* filename, int movieFps, const char* movieEncoder, int movieQP, int audioRate);
   void StopLocked();
 
   bool EnsurePresentSemaphoresLocked();
@@ -138,6 +139,20 @@ class VulkanCapture {
   void ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFrame* vkFrame, const VkPresentInfoKHR* present, VkSemaphore signalSemaphore);
 
   bool ffmpegAvailable = false;
+
+  bool EncodeAudioLocked(AVFrame* frame);
+  void DrainAudioLocked();
+
+  int audioSampleRate = 0;
+  AVCodecContext* audioCtx = nullptr;
+  AVStream* audioStream = nullptr;
+  AVPacket* audioPacket = nullptr;
+  int64_t audioSamplesSent = 0;
+  std::vector<int16_t> audioPending;
+
+  std::mutex audioMutex;
+  std::vector<int16_t> audioQueue;
+  std::atomic<bool> audioEnabled{false};
 
  private:
   // called at end of every game frame

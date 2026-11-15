@@ -109,8 +109,8 @@ void Recorder::Start(const char* outputFile) {
 
   if (recorder_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
 
-  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt());
-  Audio.Start(movie.filename.c_str(), movie.fps);
+  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt(), SND_SAMPLE_RATE);
+  Audio.Start(movie.fps, &Video);
 
   isRecording = true;
   timeStart = std::chrono::high_resolution_clock::now();
@@ -122,8 +122,8 @@ void Recorder::Start(const char* outputFile) {
 void Recorder::Stop() {
   isRecording = false;
 
-  Video.Stop();
   Audio.Stop();
+  Video.Stop();
 
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(0);
