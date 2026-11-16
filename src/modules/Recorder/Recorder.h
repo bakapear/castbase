@@ -42,12 +42,12 @@ class Recorder : public Module {
 
   CON_COMMAND_MEMBER_F(Recorder, "recorder_progress", recorder_progress, "", FCVAR_DONTRECORD | FCVAR_HIDDEN);
 
-  ConVar recorder_fps{"recorder_fps", "60", FCVAR_DONTRECORD, "Recording fps"};
-  ConVar recorder_encoder{"recorder_encoder", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hevc_vulkan, av1_vulkan)"};
-  ConVar recorder_qp{"recorder_qp", "18", FCVAR_DONTRECORD, "Recording quality & quantization (0-51, 0 = lossless)"};
+  ConVar recorder_encoder_codec{"recorder_encoder_codec", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hevc_vulkan, av1_vulkan)"};
+  ConVar recorder_encoder_fps{"recorder_encoder_fps", "60", FCVAR_DONTRECORD, "Recording fps"};
+  ConVar recorder_encoder_qp{"recorder_encoder_qp", "18", FCVAR_DONTRECORD, "Recording quality & quantization (0-51, 0 = lossless)"};
 
-  ConVar recorder_hidehud{"recorder_hidehud", "0", FCVAR_DONTRECORD, "Hide hud during recording"};
-  ConVar recorder_escstop{"recorder_escstop", "0", FCVAR_DONTRECORD, "Opening menu stops the recording"};
+  ConVar recorder_opt_hidehud{"recorder_opt_hidehud", "0", FCVAR_DONTRECORD, "Hide hud during recording"};
+  ConVar recorder_opt_escstop{"recorder_opt_escstop", "0", FCVAR_DONTRECORD, "Opening menu stops the recording"};
 
  private:
   // void CDemoActionManager::StartPlaying( char const *demfilename )

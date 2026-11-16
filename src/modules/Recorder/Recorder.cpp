@@ -44,7 +44,7 @@ void Recorder::StopPlayback(void* p) {
 
 void Recorder::OnGameUIActivated() {
   // dont call original, will crash game
-  if (isRecording && recorder_escstop.GetBool()) Stop();
+  if (isRecording && recorder_opt_escstop.GetBool()) Stop();
 }
 
 bool Recorder::Load() {
@@ -79,7 +79,7 @@ void Recorder::Start(const char* outputFile) {
   if (isRecording) Stop();
 
   movie.filename = EnsureExt(outputFile, ".mp4");
-  movie.fps = recorder_fps.GetInt();
+  movie.fps = recorder_encoder_fps.GetInt();
   Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
   ConVarRef fps_max("fps_max");
@@ -100,14 +100,14 @@ void Recorder::Start(const char* outputFile) {
   ConVarRef snd_noextraupdate("snd_noextraupdate");
   snd_noextraupdate.SetValue(1);
 
-  if (recorder_hidehud.GetBool()) {
+  if (recorder_opt_hidehud.GetBool()) {
     ConVarRef cl_drawhud("cl_drawhud");
     cl_drawhud.SetValue(0);
   }
 
-  if (recorder_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
+  if (recorder_opt_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
 
-  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder.GetString(), recorder_qp.GetInt(), SND_SAMPLE_RATE);
+  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
   Audio.Start(movie.fps, &Video);
 
   isRecording = true;
@@ -128,7 +128,7 @@ void Recorder::Stop() {
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(0);
 
-  if (recorder_hidehud.GetBool()) {
+  if (recorder_opt_hidehud.GetBool()) {
     ConVarRef cl_drawhud("cl_drawhud");
     cl_drawhud.SetValue(1);
   }
