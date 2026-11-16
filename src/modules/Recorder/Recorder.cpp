@@ -187,10 +187,11 @@ void Recorder::recorder_run(const CCommand& args) {
 
   std::string act = "";
   if (player.length()) act += "spec_mode 4; spec_player " + player + "; ";
+  if (!recorder_opt_hidehud.GetBool()) act += "cl_drawhud 1; ";
   act += "recorder_start " + filename;
 
   std::string buffer = "demoactions {\n";
-  buffer += "\"1\" { name \"1\" factory \"SkipAhead\" starttick \"0\" skiptotick \"" + std::to_string(tick_start) + "\" }\n";
+  buffer += "\"1\" { name \"1\" factory \"PlayCommands\" starttick \"0\" commands \"recorder_progress 0; cl_drawhud 0; demo_gototick " + std::to_string(tick_start) + "\" }\n";
   buffer += "\"1\" { name \"1\" factory \"PlayCommands\" starttick \"" + std::to_string(tick_start) + "\" commands \"" + act + "\" }\n";
 
   int lt = -1;
@@ -213,5 +214,10 @@ void Recorder::recorder_run(const CCommand& args) {
 }
 
 void Recorder::recorder_progress(const CCommand& args) {
-  if (isRecording && args.ArgC() == 2) PluginOut("RECORDER_PROGRESS_%s", args[1]);
+  if (args.ArgC() == 2 && Interfaces::EngineClient->IsPlayingDemo()) {
+    if (isRecording)
+      PluginOut("RECORDER_PROGRESS_%s", args[1]);
+    else if (atoi(args[1]) == 0)
+      PluginOut("DEMO_SKIP");
+  }
 }
