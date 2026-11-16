@@ -1,6 +1,7 @@
 #include "Recorder.h"
 
 #include <cdll_int.h>
+#include <characterset.h>
 #include <demofile/demoformat.h>
 #include <filesystem.h>
 #include <replay/ienginereplay.h>
@@ -11,13 +12,11 @@
 #define OVERRIDE_DEM "__override.dem"
 #define OVERRIDE_VDM "__override.vdm"
 
-std::string FixColonArgs(const CCommand& args, int start = 1) {
-  std::string result;
-  for (int i = start; i < args.ArgC(); ++i) {
-    if (!result.empty() && args[i][0] != ':' && args[i - 1][0] != ':') result += " ";
-    result += args[i];
-  }
-  return result;
+CCommand Retokenize(const CCommand& realArgs) {
+  characterset_t breakSet{};
+  CCommand args;
+  args.Tokenize(realArgs.GetCommandString(), &breakSet);
+  return args;
 }
 
 std::string EnsureExt(const char* filename, const char* extension) {
@@ -153,7 +152,9 @@ void Recorder::Stop() {
   PluginOut("RECORDER_STOP");
 }
 
-void Recorder::recorder_start(const CCommand& args) {
+void Recorder::recorder_start(const CCommand& realArgs) {
+  CCommand args = Retokenize(realArgs);
+
   if (args.ArgC() != 2) return ConMsg("Usage:  recorder_start <filename>\n");
   if (!Interfaces::EngineClient->IsPlayingDemo()) return ConWarning("Not in a demo!\n");
   if (isRecording) return ConWarning("Already recording!\n");
@@ -167,7 +168,9 @@ void Recorder::recorder_stop(const CCommand& args) {
   Stop();
 }
 
-void Recorder::recorder_run(const CCommand& args) {
+void Recorder::recorder_run(const CCommand& realArgs) {
+  CCommand args = Retokenize(realArgs);
+
   if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (<player name>/<steam id>)\n");
   if (isRecording) return ConWarning("Already recording!\n");
 
@@ -188,7 +191,8 @@ void Recorder::recorder_run(const CCommand& args) {
 
   if (tick_start >= tick_end - 100) return ConWarning("Invalid tick range!\n");
 
-  std::string player = FixColonArgs(args, 5);
+  std::string player = "";
+  if (args.ArgC() > 5) player = args[5];
 
   FileHandle_t file = g_pFullFileSystem->Open(OVERRIDE_VDM, "w", "MOD");
   if (file == FILESYSTEM_INVALID_HANDLE) return ConWarning("Failed to create override vdm file!");
@@ -230,12 +234,12 @@ void Recorder::recorder_progress(const CCommand& args) {
     PluginOut("DEMO_SKIP");
 }
 
-void Recorder::recorder_spec(const CCommand& args) {
+void Recorder::recorder_spec(const CCommand& realArgs) {
+  CCommand args = Retokenize(realArgs);
+
   if (args.ArgC() < 2 || !Interfaces::EngineClient->IsPlayingDemo()) return;
 
-  std::string player = FixColonArgs(args, 1);
-
   char cmd[256];
-  snprintf(cmd, sizeof(cmd), "spec_mode 4; spec_player \"%s\"", player.c_str());
+  snprintf(cmd, sizeof(cmd), "spec_mode 4; spec_player \"%s\"", args[1]);
   Interfaces::EngineClient->ClientCmd_Unrestricted(cmd);
 }
