@@ -41,6 +41,7 @@ class Recorder : public Module {
   CON_COMMAND_MEMBER_F(Recorder, "recorder_run", recorder_run, "Starts demo and records a specific range", FCVAR_DONTRECORD);
 
   CON_COMMAND_MEMBER_F(Recorder, "recorder_progress", recorder_progress, "", FCVAR_DONTRECORD | FCVAR_HIDDEN);
+  CON_COMMAND_MEMBER_F(Recorder, "recorder_spec", recorder_spec, "", FCVAR_DONTRECORD | FCVAR_HIDDEN);
 
   ConVar recorder_encoder_codec{"recorder_encoder_codec", "h264_vulkan", FCVAR_DONTRECORD, "Recording GPU encoder (h264_vulkan, hevc_vulkan, av1_vulkan)"};
   ConVar recorder_encoder_fps{"recorder_encoder_fps", "60", FCVAR_DONTRECORD, "Recording fps"};

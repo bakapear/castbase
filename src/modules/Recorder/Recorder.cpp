@@ -11,6 +11,15 @@
 #define OVERRIDE_DEM "__override.dem"
 #define OVERRIDE_VDM "__override.vdm"
 
+std::string FixColonArgs(const CCommand& args, int start = 1) {
+  std::string result;
+  for (int i = start; i < args.ArgC(); ++i) {
+    if (!result.empty() && args[i][0] != ':' && args[i - 1][0] != ':') result += " ";
+    result += args[i];
+  }
+  return result;
+}
+
 std::string EnsureExt(const char* filename, const char* extension) {
   std::string result = filename ? filename : "";
   std::string ext = extension ? extension : "";
@@ -159,7 +168,7 @@ void Recorder::recorder_stop(const CCommand& args) {
 }
 
 void Recorder::recorder_run(const CCommand& args) {
-  if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (steam id)\n");
+  if (args.ArgC() < 5) return ConMsg("Usage:  recorder_run <filename> <demo> <start tick> <end tick> (<player name>/<steam id>)\n");
   if (isRecording) return ConWarning("Already recording!\n");
 
   std::string filename = EnsureExt(args[1], ".mp4");
@@ -179,14 +188,13 @@ void Recorder::recorder_run(const CCommand& args) {
 
   if (tick_start >= tick_end - 100) return ConWarning("Invalid tick range!\n");
 
-  std::string player;
-  if (args.ArgC() > 5) player = args[5];
+  std::string player = FixColonArgs(args, 5);
 
   FileHandle_t file = g_pFullFileSystem->Open(OVERRIDE_VDM, "w", "MOD");
   if (file == FILESYSTEM_INVALID_HANDLE) return ConWarning("Failed to create override vdm file!");
 
   std::string act = "";
-  if (player.length()) act += "spec_mode 4; spec_player " + player + "; ";
+  if (player.length()) act += "recorder_spec " + player + "; ";
   if (!recorder_opt_hidehud.GetBool()) act += "cl_drawhud 1; ";
   act += "recorder_start " + filename;
 
@@ -214,10 +222,20 @@ void Recorder::recorder_run(const CCommand& args) {
 }
 
 void Recorder::recorder_progress(const CCommand& args) {
-  if (args.ArgC() == 2 && Interfaces::EngineClient->IsPlayingDemo()) {
-    if (isRecording)
-      PluginOut("RECORDER_PROGRESS_%s", args[1]);
-    else if (atoi(args[1]) == 0)
-      PluginOut("DEMO_SKIP");
-  }
+  if (args.ArgC() != 2 || !Interfaces::EngineClient->IsPlayingDemo()) return;
+
+  if (isRecording)
+    PluginOut("RECORDER_PROGRESS_%s", args[1]);
+  else if (atoi(args[1]) == 0)
+    PluginOut("DEMO_SKIP");
+}
+
+void Recorder::recorder_spec(const CCommand& args) {
+  if (args.ArgC() < 2 || !Interfaces::EngineClient->IsPlayingDemo()) return;
+
+  std::string player = FixColonArgs(args, 1);
+
+  char cmd[256];
+  snprintf(cmd, sizeof(cmd), "spec_mode 4; spec_player \"%s\"", player.c_str());
+  Interfaces::EngineClient->ClientCmd_Unrestricted(cmd);
 }
