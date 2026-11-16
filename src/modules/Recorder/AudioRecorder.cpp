@@ -1,7 +1,15 @@
 #include "AudioRecorder.h"
 
+#include <algorithm>
+
 #include "VulkanCapture.h"
 #include "base/Sig.h"
+
+static short ClipSample(int value, float volume) {
+  value = (int)(value * volume);
+  value = std::clamp(value, -32768, 32767);
+  return (short)value;
+}
 
 bool AudioRecorder::FilterTime(void* p, float dt) {
   auto fn = hookFilterTime.GetTrampoline(&AudioRecorder::FilterTime);
@@ -52,7 +60,7 @@ void AudioRecorder::TransferSamples(void* p, int end) {
 
   for (int i = 0; i < numSamples; i++) {
     SndSample* sample = &paintBuffer[i];
-    buf[i] = WaveSample{(short)sample->left, (short)sample->right};
+    buf[i] = WaveSample{ClipSample(sample->left, volume), ClipSample(sample->right, volume)};
   }
 
   video->WriteAudio(reinterpret_cast<const int16_t*>(buf), numSamples);
@@ -89,7 +97,8 @@ void AudioRecorder::Unload() {
   hookFilterTime.Remove();
 }
 
-void AudioRecorder::Start(int outFps, VulkanCapture* target) {
+void AudioRecorder::Start(int outFps, float outVolume, VulkanCapture* target) {
+  volume = outVolume;
   if (!paintedTime) paintedTime = (int*)ptrPaintedTime;
   if (!paintBuffer) paintBuffer = *(SndSample**)ptrPaintBuffer;
 

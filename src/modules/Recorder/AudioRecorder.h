@@ -21,13 +21,14 @@ class AudioRecorder {
   bool Load();
   void Unload();
 
-  void Start(int outFps, VulkanCapture* target);
+  void Start(int outFps, float outVolume, VulkanCapture* target);
   void Stop();
 
  private:
   VulkanCapture* video;
   bool isRecording;
   int fps;
+  float volume;
 
   bool isPainting;
   bool isUnderwater;
