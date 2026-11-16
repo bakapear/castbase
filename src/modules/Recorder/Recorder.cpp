@@ -86,7 +86,12 @@ void Recorder::Start(const char* outputFile) {
 
   if (isRecording) Stop();
 
+  char fullPath[MAX_PATH];
+  g_pFullFileSystem->RelativePathToFullPath(recorder_outdir.GetString(), nullptr, fullPath, sizeof(fullPath));
+
   movie.filename = EnsureExt(outputFile, ".mp4");
+  movie.directory = fullPath;
+
   movie.fps = recorder_encoder_fps.GetInt();
   Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
@@ -115,7 +120,9 @@ void Recorder::Start(const char* outputFile) {
 
   if (recorder_opt_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
 
-  Video.Start(movie.filename.c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
+  bool success = Video.Start((movie.directory + "\\" + movie.filename).c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
+  if (!success) return ConWarning("Failed to start recording!\n");
+
   Audio.Start(movie.fps, &Video);
 
   isRecording = true;
@@ -145,9 +152,7 @@ void Recorder::Stop() {
   const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
   ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%i frames, %ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), frames, movie.width, movie.height, movie.fps);
 
-  char fullPath[MAX_PATH];
-  g_pFullFileSystem->RelativePathToFullPath(movie.filename.c_str(), nullptr, fullPath, sizeof(fullPath));
-  ConColorMsg(Color(255, 255, 0, 255), "Saved to: %s\n", fullPath);
+  ConColorMsg(Color(255, 255, 0, 255), "Saved to: %s\n", (movie.directory + "\\" + movie.filename).c_str());
 
   PluginOut("RECORDER_STOP");
 }

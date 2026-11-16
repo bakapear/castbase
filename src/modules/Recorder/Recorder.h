@@ -11,6 +11,7 @@
 
 struct Movie {
   std::string filename;
+  std::string directory;
   int fps;
   int width;
   int height;
@@ -49,6 +50,8 @@ class Recorder : public Module {
 
   ConVar recorder_opt_hidehud{"recorder_opt_hidehud", "0", FCVAR_DONTRECORD, "Hide hud during recording"};
   ConVar recorder_opt_escstop{"recorder_opt_escstop", "0", FCVAR_DONTRECORD, "Opening menu stops the recording"};
+
+  ConVar recorder_outdir{"recorder_outdir", "", FCVAR_DONTRECORD, "Recording output directory. Path is relative to the game exe"};
 
  private:
   // void CDemoActionManager::StartPlaying( char const *demfilename )
