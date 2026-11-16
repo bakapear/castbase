@@ -12,14 +12,14 @@
 #define OVERRIDE_DEM "__override.dem"
 #define OVERRIDE_VDM "__override.vdm"
 
-CCommand Retokenize(const CCommand& realArgs) {
+static CCommand Retokenize(const CCommand& realArgs) {
   characterset_t breakSet{};
   CCommand args;
   args.Tokenize(realArgs.GetCommandString(), &breakSet);
   return args;
 }
 
-std::string EnsureExt(const char* filename, const char* extension) {
+static std::string EnsureExt(const char* filename, const char* extension) {
   std::string result = filename ? filename : "";
   std::string ext = extension ? extension : "";
   if (ext.empty() || result.empty()) return result;

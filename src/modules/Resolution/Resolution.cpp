@@ -11,7 +11,7 @@
 namespace SourceRes {
 
 // Find the address of the engine's internal video mode count.
-int* GetInternalModeCount(const vmode_s* modeList, int count) {
+static int* GetInternalModeCount(const vmode_s* modeList, int count) {
   // Mode count should be right before the mode array.
   int* modeCount = (int*)modeList - 1;
 
