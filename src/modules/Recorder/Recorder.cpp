@@ -123,7 +123,7 @@ void Recorder::Start(const char* outputFile) {
   bool success = Video.Start((movie.directory + "\\" + movie.filename).c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
   if (!success) return ConWarning("Failed to start recording!\n");
 
-  Audio.Start(movie.fps, 0.25, &Video);
+  Audio.Start(movie.fps, recorder_encoder_volume.GetFloat(), &Video);
 
   isRecording = true;
   timeStart = std::chrono::high_resolution_clock::now();
