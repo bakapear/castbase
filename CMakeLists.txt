@@ -25,11 +25,16 @@ find_library(AVFORMAT_LIB NAMES avformat PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PA
 find_library(AVUTIL_LIB NAMES avutil PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
 
 # Git version fetch
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/ORIG_HEAD)
-    include(cmake/GetGitRevisionDescription.cmake)
-    get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-    string(SUBSTRING ${GIT_SHA1} 0 7 GIT_SHA1_SHORT)
-    set(PLUGIN_VERSION "${PROJECT_VERSION} (${GIT_SHA1_SHORT})")
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short=7 HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_SHA1_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
+    )
+    if(GIT_SHA1_SHORT)
+        set(PLUGIN_VERSION "${PROJECT_VERSION} (${GIT_SHA1_SHORT})")
+    endif()
 endif()
 
 # PluginInfo
