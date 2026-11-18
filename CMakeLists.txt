@@ -12,18 +12,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_STANDARD 17) # has to be 17 due to C2666 error in utlsymbol.h
 set(HL2SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013/src)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(FFMPEG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg)
+set(FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/ffmpeg/out")
 
 set(PLUGIN_NAME ${PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
 find_package(Vulkan REQUIRED)
 
-find_path(FFMPEG_INCLUDE_DIRS NAMES libavcodec/avcodec.h PATHS ${FFMPEG_DIR}/include)
-find_library(AVCODEC_LIB NAMES avcodec PATHS ${FFMPEG_DIR}/lib)
-find_library(AVFORMAT_LIB NAMES avformat PATHS ${FFMPEG_DIR}/lib)
-find_library(AVUTIL_LIB NAMES avutil PATHS ${FFMPEG_DIR}/lib)
-find_library(SWSCALE_LIB NAMES swscale PATHS ${FFMPEG_DIR}/lib)
+find_path(FFMPEG_INCLUDE_DIR NAMES libavcodec/avcodec.h PATHS "${FFMPEG_DIR}/include" NO_DEFAULT_PATH REQUIRED)
+find_library(AVCODEC_LIB NAMES avcodec PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
+find_library(AVFORMAT_LIB NAMES avformat PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
+find_library(AVUTIL_LIB NAMES avutil PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
 
 # Git version fetch
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git/ORIG_HEAD)
@@ -68,16 +67,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${HL2SDK_DIR}/game/shared
 
     ${Vulkan_INCLUDE_DIRS}
-    ${FFMPEG_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIR}
 )
-
-# Delay load FFMPEG dlls
-target_link_options(${PROJECT_NAME} PRIVATE
-    "/DELAYLOAD:avcodec-63.dll"
-    "/DELAYLOAD:avformat-63.dll"
-    "/DELAYLOAD:avutil-61.dll"
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE delayimp)
 
 # Compiler options
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -91,15 +82,18 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 # Set MSVC runtime library to MultiThreaded
 set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
+set_source_files_properties(
+    ${HL2SDK_DIR}/public/tier0/memoverride.cpp
+    PROPERTIES 
+        COMPILE_DEFINITIONS "_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_ALLOW_RUNTIME_LIBRARY_MISMATCH"
+        COMPILE_OPTIONS "/FI${SRC_DIR}/base/fills/NoDbgAssert.h"
+)
+
 # Compiler definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     COMPILER_MSVC
     COMPILER_MSVC64
     CLIENT_DLL
-
-    # has to be set so memoverride.cpp can build with latest Windows SDK
-    _DEBUG # so that crtdbg.h doesnt redefine malloc
-    NDEBUG # undefine debug afterwards
 
     # useful defines from client_win64_tf.vcxproj
     REPLAY_ENABLED
@@ -133,23 +127,19 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
     ${Vulkan_LIBRARIES}
 
-    ${AVCODEC_LIB}
     ${AVFORMAT_LIB}
+    ${AVCODEC_LIB}
     ${AVUTIL_LIB}
-    ${SWSCALE_LIB}
+    bcrypt
 )
-
-file(GLOB FFMPEG_DLLS "${FFMPEG_DIR}/bin/*.dll")
 
 # Post-build steps
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/mod
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/mod/addons"
 
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.dll"
     COMMAND ${CMAKE_COMMAND} -E echo "Plugin { file \"addons/${PROJECT_NAME}\" }" > "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.vdf"
-
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/mod/addons/ffmpeg"
-    COMMAND ${CMAKE_COMMAND} -E copy ${FFMPEG_DLLS} "${CMAKE_SOURCE_DIR}/mod/addons/ffmpeg"
 )
