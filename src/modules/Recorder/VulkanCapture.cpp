@@ -1191,11 +1191,15 @@ bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const
     pts = (int64_t)(elapsedUs * kCaptureTimeScale / 1000000);
     if (pts <= lastPts) pts = lastPts + 1;
   }
+
+  if (frameCallback) frameCallback(frameIndex, pts);
+
   frameIndex++;
   lastPts = pts;
 
   conv.pendingFrame = frame;
   conv.pendingPts = pts;
   conv.pendingDuration = fps > 0 ? (kCaptureTimeScale / fps) : (kCaptureTimeScale / 60);
+
   return true;
 }

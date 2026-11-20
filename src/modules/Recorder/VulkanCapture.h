@@ -5,6 +5,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -20,6 +21,8 @@ struct AVFrame;
 struct AVPacket;
 struct AVVkFrame;
 
+using CaptureFrameCallback = std::function<void(int64_t frameIndex, int64_t pts)>;
+
 class VulkanCapture {
  public:
   bool Load();
@@ -31,6 +34,11 @@ class VulkanCapture {
   void WriteAudio(const int16_t* interleavedStereo, int numSamples);
 
   int GetFrameCount() { return frameIndex; }
+
+  void OnCaptureFrame(CaptureFrameCallback cb) {
+    std::lock_guard<std::mutex> guard(mutex);
+    frameCallback = std::move(cb);
+  }
 
  private:
   // fake device to hook functions
@@ -151,6 +159,8 @@ class VulkanCapture {
   std::mutex audioMutex;
   std::vector<int16_t> audioQueue;
   std::atomic<bool> audioEnabled{false};
+
+  CaptureFrameCallback frameCallback;
 
  private:
   // called at end of every game frame
