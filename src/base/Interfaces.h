@@ -2,11 +2,6 @@
 
 #include "interface.h"
 
-class C_BasePlayer;
-class C_GameRules;
-class C_HLTVCamera;
-struct cmdalias_t;
-class HLTVCameraOverride;
 class CSteamAPIContext;
 class IBaseClientDLL;
 class IClientEngineTools;
