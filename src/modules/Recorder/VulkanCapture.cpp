@@ -50,10 +50,10 @@ static constexpr int kCaptureTimeScale = 90000;  // 90 kHz
 static const uint32_t kNV12ComputeSpv[] = {0x07230203, 0x00010000, 0x000d000b, 0x0000011a, 0x00000000, 0x00020011, 0x00000001, 0x00020011, 0x00000031, 0x00020011, 0x00000032, 0x0006000b, 0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001, 0x0006000f, 0x00000005, 0x00000004, 0x6e69616d, 0x00000000, 0x00000045, 0x00060010, 0x00000004, 0x00000011, 0x00000008, 0x00000008, 0x00000001, 0x00030047, 0x0000003e, 0x00000018, 0x00040047, 0x0000003e, 0x00000021, 0x00000000, 0x00040047, 0x0000003e, 0x00000022, 0x00000000, 0x00040047, 0x00000045, 0x0000000b, 0x0000001c, 0x00030047, 0x00000075, 0x00000019, 0x00040047, 0x00000075, 0x00000021, 0x00000001, 0x00040047, 0x00000075, 0x00000022, 0x00000000, 0x00030047, 0x000000b1, 0x00000019, 0x00040047, 0x000000b1, 0x00000021, 0x00000002, 0x00040047, 0x000000b1, 0x00000022, 0x00000000, 0x00040047, 0x000000c8, 0x0000000b, 0x00000019, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002, 0x00030016, 0x00000006, 0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000003, 0x00040015, 0x00000009, 0x00000020, 0x00000001, 0x00040017, 0x0000000a, 0x00000009, 0x00000002, 0x0004002b, 0x00000006, 0x00000013, 0x3e59b3d0, 0x0004002b, 0x00000006, 0x00000014, 0x3f371759, 0x0004002b, 0x00000006, 0x00000015, 0x3d93dd98, 0x0006002c, 0x00000007, 0x00000016, 0x00000013, 0x00000014, 0x00000015, 0x0004002b, 0x00000006, 0x0000001a, 0x3f99999a, 0x00040017, 0x0000001d, 0x00000006, 0x00000002, 0x0004002b, 0x00000006, 0x00000024, 0x3f000000, 0x0004002b, 0x00000006, 0x0000002c, 0x3f800000, 0x0004002b, 0x00000006, 0x00000035, 0x00000000, 0x00090019, 0x0000003c, 0x00000006, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0x00000004, 0x00040020, 0x0000003d, 0x00000000, 0x0000003c, 0x0004003b, 0x0000003d, 0x0000003e, 0x00000000, 0x00040015, 0x00000042, 0x00000020, 0x00000000, 0x00040017, 0x00000043, 0x00000042, 0x00000003, 0x00040020, 0x00000044, 0x00000001, 0x00000043, 0x0004003b, 0x00000044, 0x00000045, 0x00000001, 0x00040017, 0x00000046, 0x00000042, 0x00000002, 0x00020014, 0x0000004a, 0x0004002b, 0x00000042, 0x0000004b, 0x00000000, 0x0004002b, 0x00000042, 0x00000055, 0x00000001, 0x00040017, 0x00000062, 0x00000006, 0x00000004, 0x0004002b, 0x00000006, 0x00000067, 0x3d808081, 0x0004002b, 0x00000006, 0x00000068, 0x3f5bdbdc, 0x00090019, 0x00000073, 0x00000006, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0x0000000f, 0x00040020, 0x00000074, 0x00000000, 0x00000073, 0x0004003b, 0x00000074, 0x00000075, 0x00000000, 0x0004002b, 0x00000009, 0x0000007f, 0x00000001, 0x0004002b, 0x00000009, 0x00000081, 0x00000000, 0x0004002b, 0x00000006, 0x000000a6, 0x3e800000, 0x00090019, 0x000000af, 0x00000006, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000002, 0x0000000d, 0x00040020, 0x000000b0, 0x00000000, 0x000000af, 0x0004003b, 0x000000b0, 0x000000b1, 0x00000000, 0x0004002b, 0x00000006, 0x000000b6, 0x3f008081, 0x0004002b, 0x00000006, 0x000000b7, 0x3f60e0e1, 0x0004002b, 0x00000006, 0x000000b9, 0xbdeaa4ba, 0x0004002b, 0x00000006, 0x000000ba, 0xbec556d2, 0x0006002c, 0x00000007, 0x000000bb, 0x000000b9, 0x000000ba, 0x00000024, 0x0004002b, 0x00000006, 0x000000c0, 0xbee886be, 0x0004002b, 0x00000006, 0x000000c1, 0xbd3bca10, 0x0006002c, 0x00000007, 0x000000c2, 0x00000024, 0x000000c0, 0x000000c1, 0x0004002b, 0x00000042, 0x000000c7, 0x00000008, 0x0006002c, 0x00000043, 0x000000c8, 0x000000c7, 0x000000c7, 0x00000055, 0x0006002c, 0x00000007, 0x00000115, 0x0000001a, 0x0000001a, 0x0000001a, 0x0006002c, 0x00000007, 0x00000116, 0x00000035, 0x00000035, 0x00000035, 0x0006002c, 0x00000007, 0x00000117, 0x0000002c, 0x0000002c, 0x0000002c, 0x0005002c, 0x0000000a, 0x00000118, 0x0000007f, 0x0000007f, 0x0004002b, 0x00000006, 0x00000119, 0x3d4ccccd, 0x00050036, 0x00000002, 0x00000004, 0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x000300f7, 0x000000c9, 0x00000000, 0x000300fb, 0x0000004b, 0x000000ca, 0x000200f8, 0x000000ca, 0x0004003d, 0x0000003c, 0x0000003f, 0x0000003e, 0x00040068, 0x0000000a, 0x00000040, 0x0000003f, 0x0004003d, 0x00000043, 0x00000047, 0x00000045, 0x0007004f, 0x00000046, 0x00000048, 0x00000047, 0x00000047, 0x00000000, 0x00000001, 0x0004007c, 0x0000000a, 0x00000049, 0x00000048, 0x00050051, 0x00000009, 0x0000004e, 0x00000049, 0x00000000, 0x00050051, 0x00000009, 0x00000050, 0x00000040, 0x00000000, 0x000500af, 0x0000004a, 0x00000051, 0x0000004e, 0x00000050, 0x000400a8, 0x0000004a, 0x00000052, 0x00000051, 0x000300f7, 0x00000054, 0x00000000, 0x000400fa, 0x00000052, 0x00000053, 0x00000054, 0x000200f8, 0x00000053, 0x00050051, 0x00000009, 0x00000057, 0x00000049, 0x00000001, 0x00050051, 0x00000009, 0x00000059, 0x00000040, 0x00000001, 0x000500af, 0x0000004a, 0x0000005a, 0x00000057, 0x00000059, 0x000200f9, 0x00000054, 0x000200f8, 0x00000054, 0x000700f5, 0x0000004a, 0x0000005b, 0x00000051, 0x000000ca, 0x0000005a, 0x00000053, 0x000300f7, 0x0000005d, 0x00000000, 0x000400fa, 0x0000005b, 0x0000005c, 0x0000005d, 0x000200f8, 0x0000005c, 0x000200f9, 0x000000c9, 0x000200f8, 0x0000005d, 0x0004003d, 0x0000003c, 0x00000060, 0x0000003e, 0x00050062, 0x00000062, 0x00000063, 0x00000060, 0x00000049, 0x0008004f, 0x00000007, 0x00000064, 0x00000063, 0x00000063, 0x00000000, 0x00000001, 0x00000002, 0x00050094, 0x00000006, 0x000000d3, 0x00000064, 0x00000016, 0x00060050, 0x00000007, 0x000000d4, 0x000000d3, 0x000000d3, 0x000000d3, 0x0008000c, 0x00000007, 0x000000d7, 0x00000001, 0x0000002e, 0x000000d4, 0x00000064, 0x00000115, 0x0004006f, 0x0000001d, 0x000000d9, 0x00000049, 0x0004006f, 0x0000001d, 0x000000db, 0x00000040, 0x0005008e, 0x0000001d, 0x000000dc, 0x000000db, 0x00000024, 0x00050083, 0x0000001d, 0x000000dd, 0x000000d9, 0x000000dc, 0x00050088, 0x0000001d, 0x000000e1, 0x000000dd, 0x000000dc, 0x00050094, 0x00000006, 0x000000e5, 0x000000e1, 0x000000e1, 0x00050085, 0x00000006, 0x000000e7, 0x000000e5, 0x00000119, 0x00050083, 0x00000006, 0x000000e8, 0x0000002c, 0x000000e7, 0x0005008e, 0x00000007, 0x000000e9, 0x000000d7, 0x000000e8, 0x0008000c, 0x00000007, 0x000000ec, 0x00000001, 0x0000002b, 0x000000e9, 0x00000116, 0x00000117, 0x00050094, 0x00000006, 0x00000070, 0x000000ec, 0x00000016, 0x00050085, 0x00000006, 0x00000071, 0x00000068, 0x00000070, 0x00050081, 0x00000006, 0x00000072, 0x00000067, 0x00000071, 0x0004003d, 0x00000073, 0x00000076, 0x00000075, 0x00070050, 0x00000062, 0x00000079, 0x00000072, 0x00000035, 0x00000035, 0x00000035, 0x00040063, 0x00000076, 0x00000049, 0x00000079, 0x00050051, 0x00000009, 0x0000007d, 0x00000049, 0x00000001, 0x000500c5, 0x00000009, 0x0000007e, 0x0000004e, 0x0000007d, 0x000500c7, 0x00000009, 0x00000080, 0x0000007e, 0x0000007f, 0x000500aa, 0x0000004a, 0x00000082, 0x00000080, 0x00000081, 0x000300f7, 0x00000084, 0x00000000, 0x000400fa, 0x00000082, 0x00000083, 0x00000084, 0x000200f8, 0x00000083, 0x00050080, 0x0000000a, 0x00000088, 0x00000049, 0x00000118, 0x00050082, 0x0000000a, 0x0000008b, 0x00000040, 0x00000118, 0x0007000c, 0x0000000a, 0x0000008c, 0x00000001, 0x00000027, 0x00000088, 0x0000008b, 0x0004003d, 0x0000003c, 0x0000008f, 0x0000003e, 0x00050051, 0x00000009, 0x00000091, 0x0000008c, 0x00000000, 0x00050050, 0x0000000a, 0x00000094, 0x00000091, 0x0000007d, 0x00050062, 0x00000062, 0x00000095, 0x0000008f, 0x00000094, 0x0008004f, 0x00000007, 0x00000096, 0x00000095, 0x00000095, 0x00000000, 0x00000001, 0x00000002, 0x00050081, 0x00000007, 0x00000097, 0x00000064, 0x00000096, 0x0004003d, 0x0000003c, 0x00000098, 0x0000003e, 0x00050051, 0x00000009, 0x0000009c, 0x0000008c, 0x00000001, 0x00050050, 0x0000000a, 0x0000009d, 0x0000004e, 0x0000009c, 0x00050062, 0x00000062, 0x0000009e, 0x00000098, 0x0000009d, 0x0008004f, 0x00000007, 0x0000009f, 0x0000009e, 0x0000009e, 0x00000000, 0x00000001, 0x00000002, 0x00050081, 0x00000007, 0x000000a0, 0x00000097, 0x0000009f, 0x0004003d, 0x0000003c, 0x000000a1, 0x0000003e, 0x00050062, 0x00000062, 0x000000a3, 0x000000a1, 0x0000008c, 0x0008004f, 0x00000007, 0x000000a4, 0x000000a3, 0x000000a3, 0x00000000, 0x00000001, 0x00000002, 0x00050081, 0x00000007, 0x000000a5, 0x000000a0, 0x000000a4, 0x0005008e, 0x00000007, 0x000000a7, 0x000000a5, 0x000000a6, 0x00050094, 0x00000006, 0x000000f1, 0x000000a7, 0x00000016, 0x00060050, 0x00000007, 0x000000f2, 0x000000f1, 0x000000f1, 0x000000f1, 0x0008000c, 0x00000007, 0x000000f5, 0x00000001, 0x0000002e, 0x000000f2, 0x000000a7, 0x00000115, 0x0005008e, 0x00000007, 0x00000107, 0x000000f5, 0x000000e8, 0x0008000c, 0x00000007, 0x0000010a, 0x00000001, 0x0000002b, 0x00000107, 0x00000116, 0x00000117, 0x0004003d, 0x000000af, 0x000000b2, 0x000000b1, 0x000500c3, 0x0000000a, 0x000000b5, 0x00000049, 0x00000118, 0x00050094, 0x00000006, 0x000000bc, 0x0000010a, 0x000000bb, 0x00050085, 0x00000006, 0x000000bd, 0x000000b7, 0x000000bc, 0x00050081, 0x00000006, 0x000000be, 0x000000b6, 0x000000bd, 0x00050094, 0x00000006, 0x000000c3, 0x0000010a, 0x000000c2, 0x00050085, 0x00000006, 0x000000c4, 0x000000b7, 0x000000c3, 0x00050081, 0x00000006, 0x000000c5, 0x000000b6, 0x000000c4, 0x00070050, 0x00000062, 0x000000c6, 0x000000be, 0x000000c5, 0x00000035, 0x00000035, 0x00040063, 0x000000b2, 0x000000b5, 0x000000c6, 0x000200f9, 0x00000084, 0x000200f8, 0x00000084, 0x000200f9, 0x000000c9, 0x000200f8, 0x000000c9, 0x000100fd, 0x00010038};
 
 static uint32_t FindMemoryType(const VkPhysicalDeviceMemoryProperties& memProps, uint32_t typeBits, VkMemoryPropertyFlags required) {
-  for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+  for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
     if ((typeBits & (1u << i)) && (memProps.memoryTypes[i].propertyFlags & required) == required) return i;
   }
-  for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+  for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
     if (typeBits & (1u << i)) return i;
   }
   return 0;
@@ -73,7 +73,7 @@ VkResult VKAPI_CALL VulkanCapture::QueuePresentKHR(VkQueue queue, const VkPresen
   {
     std::lock_guard<std::mutex> guard(mutex);
     if (recording.load()) {
-      for (uint32_t i = 0; i < pPresentInfo->swapchainCount; ++i) {
+      for (uint32_t i = 0; i < pPresentInfo->swapchainCount; i++) {
         if (pPresentInfo->pSwapchains[i] != swapchain) continue;
         CaptureFrameLocked(queue, pPresentInfo->pImageIndices[i], pPresentInfo, &captureDone);
         break;
@@ -154,7 +154,7 @@ bool VulkanCapture::CreateFakeDevice() {
     vkEnumeratePhysicalDevices(instance, &gpu_count, gpus.data());
 
     int use_gpu = 0;
-    for (int i = 0; i < (int)gpu_count; ++i) {
+    for (int i = 0; i < (int)gpu_count; i++) {
       VkPhysicalDeviceProperties properties;
       vkGetPhysicalDeviceProperties(gpus[i], &properties);
       if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -179,7 +179,7 @@ bool VulkanCapture::CreateFakeDevice() {
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, NULL);
     queueFamilies.resize(count);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queueFamilies.data());
-    for (uint32_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; i++) {
       if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
         queueFamily = i;
         break;
@@ -338,9 +338,9 @@ static AVFrame* MakeAudioFrame(AVCodecContext* ctx, const int16_t* src, int numS
     return nullptr;
   }
 
-  for (int c = 0; c < 2; ++c) {
+  for (int c = 0; c < 2; c++) {
     float* dst = reinterpret_cast<float*>(f->data[c]);
-    for (int i = 0; i < f->nb_samples; ++i) dst[i] = i < numSamples ? src[i * 2 + c] / 32768.0f : 0.0f;
+    for (int i = 0; i < f->nb_samples; i++) dst[i] = i < numSamples ? src[i * 2 + c] / 32768.0f : 0.0f;
   }
   if (numSamples < f->nb_samples) f->nb_samples = numSamples;  // short last frame
 
@@ -548,7 +548,7 @@ int VulkanCapture::WritePackets() {
         static std::atomic<bool> logged(false);
         if (!logged.exchange(true)) REC_LOG("[MP4] ERROR: av_interleaved_write_frame failed: %d", ret);
       } else {
-        ++written;
+        written++;
       }
     }
     av_packet_unref(packet);
@@ -753,7 +753,7 @@ bool VulkanCapture::InitConverter() {
   }
 
   VkDescriptorSetLayoutBinding bindings[3] = {};
-  for (uint32_t i = 0; i < 3; ++i) {
+  for (uint32_t i = 0; i < 3; i++) {
     bindings[i].binding = i;
     bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
     bindings[i].descriptorCount = 1;
@@ -1001,7 +1001,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
     barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barriers[count].image = srcImage;
     barriers[count].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-    ++count;
+    count++;
 
     if (!conv.intermediateInTransferDst) {
       barriers[count].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1013,7 +1013,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
       barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
       barriers[count].image = conv.intermediateImage;
       barriers[count].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-      ++count;
+      count++;
       conv.intermediateInTransferDst = true;
     }
 
@@ -1041,12 +1041,12 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
     barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barriers[count].image = conv.intermediateImage;
     barriers[count].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-    ++count;
+    count++;
 
     const VkImageAspectFlags dstAspect = multiplane ? static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_PLANE_0_BIT | VK_IMAGE_ASPECT_PLANE_1_BIT) : static_cast<VkImageAspectFlags>(VK_IMAGE_ASPECT_COLOR_BIT);
 
     const uint32_t planeCount = multiplane ? 1 : 2;
-    for (uint32_t i = 0; i < planeCount; ++i) {
+    for (uint32_t i = 0; i < planeCount; i++) {
       barriers[count].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
       barriers[count].srcAccessMask = 0;
       barriers[count].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
@@ -1056,7 +1056,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
       barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
       barriers[count].image = vkFrame->img[i];
       barriers[count].subresourceRange = {dstAspect, 0, 1, 0, 1};
-      ++count;
+      count++;
     }
 
     vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, count, barriers);
@@ -1079,7 +1079,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
     barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barriers[count].image = conv.intermediateImage;
     barriers[count].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-    ++count;
+    count++;
 
     barriers[count].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barriers[count].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
@@ -1090,7 +1090,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
     barriers[count].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barriers[count].image = srcImage;
     barriers[count].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-    ++count;
+    count++;
 
     vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, count, barriers);
   }
@@ -1112,7 +1112,7 @@ void VulkanCapture::ConvertFrameToNV12(VkQueue queue, VkImage srcImage, AVVkFram
   vkQueueSubmit(queue, 1, &submitInfo, conv.captureFence);
 
   const uint32_t planeCount = multiplane ? 1 : 2;
-  for (uint32_t i = 0; i < planeCount; ++i) vkFrame->layout[i] = VK_IMAGE_LAYOUT_GENERAL;
+  for (uint32_t i = 0; i < planeCount; i++) vkFrame->layout[i] = VK_IMAGE_LAYOUT_GENERAL;
 }
 
 bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const VkPresentInfoKHR* present, VkSemaphore* outSemaphore) {
@@ -1163,7 +1163,7 @@ bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const
     infos[2].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
     VkWriteDescriptorSet writes[3] = {};
-    for (uint32_t i = 0; i < 3; ++i) {
+    for (uint32_t i = 0; i < 3; i++) {
       writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
       writes[i].dstSet = conv.descSet;
       writes[i].dstBinding = i;
@@ -1191,7 +1191,7 @@ bool VulkanCapture::CaptureFrameLocked(VkQueue queue, uint32_t imageIndex, const
     pts = (int64_t)(elapsedUs * kCaptureTimeScale / 1000000);
     if (pts <= lastPts) pts = lastPts + 1;
   }
-  ++frameIndex;
+  frameIndex++;
   lastPts = pts;
 
   conv.pendingFrame = frame;
