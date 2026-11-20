@@ -3,6 +3,7 @@
 #include <convar.h>
 
 #include <chrono>
+#include <vector>
 
 #include "AudioRecorder.h"
 #include "VulkanCapture.h"
@@ -15,6 +16,11 @@ struct Movie {
   int fps;
   int width;
   int height;
+};
+
+struct CapData {
+  int tick;
+  float velX, velY, velZ;
 };
 
 class Recorder : public Module {
@@ -51,8 +57,11 @@ class Recorder : public Module {
 
   ConVar recorder_opt_hidehud{"recorder_opt_hidehud", "0", FCVAR_DONTRECORD, "Hide hud during recording"};
   ConVar recorder_opt_escstop{"recorder_opt_escstop", "0", FCVAR_DONTRECORD, "Opening menu stops the recording"};
+  ConVar recorder_opt_datarec{"recorder_opt_capdata", "0", FCVAR_DONTRECORD, "Record additional data into captions"};
 
   ConVar recorder_outdir{"recorder_outdir", "", FCVAR_DONTRECORD, "Recording output directory. Path is relative to the game exe"};
+
+  std::vector<CapData> capData;
 
  private:
   // void CDemoActionManager::StartPlaying( char const *demfilename )

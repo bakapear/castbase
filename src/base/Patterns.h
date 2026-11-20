@@ -1,5 +1,13 @@
 #define _SIGPAT_EXP(module, pattern, offs, disp) module, pattern, offs, disp
 
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/game/client/c_baseplayer.cpp#L297
+// RecvPropEHandle ( RECVINFO(m_hObserverTarget), RecvProxy_ObserverTarget )
+#define RECVOFFS_ObserverTarget 0x1650
+
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/game/client/c_baseplayer.cpp#L238
+// RecvPropFloat ( RECVINFO(m_vecVelocity[0]), 0, RecvProxy_LocalVelocityX )
+#define RECVOFFS_Velocity 0x178
+
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/common/GameUI/IGameUI.h#L59
 // virtual void OnGameUIActivated() = 0;
 #define SIGVTI_OnGameUIActivated 6

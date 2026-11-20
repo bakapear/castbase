@@ -6,6 +6,11 @@
 #include <filesystem.h>
 #include <replay/ienginereplay.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4471)  // warning C4471: '_D3DFORMAT': a forward declaration of an unscoped enumeration must have an underlying type
+#include <client/cliententitylist.h>
+#pragma warning(pop)
+
 #include "base/Interfaces.h"
 #include "base/Sig.h"
 
@@ -25,6 +30,16 @@ static std::string EnsureExt(const char* filename, const char* extension) {
   if (ext.empty() || result.empty()) return result;
   if (result.size() < ext.size() || result.compare(result.size() - ext.size(), ext.size(), ext) != 0) result += ext;
   return result;
+}
+
+static const float* GetObserverVelocity() {
+  constexpr int kOffObserverTarget = RECVOFFS_ObserverTarget;
+  constexpr int kOffVelocity = RECVOFFS_Velocity;
+
+  IClientEntity* local = Interfaces::ClientEntityList->GetClientEntity(Interfaces::EngineClient->GetLocalPlayer());
+  IClientEntity* target = Interfaces::ClientEntityList->GetClientEntity(*(unsigned long*)((char*)local + kOffObserverTarget) & 0x7FF);
+
+  return (const float*)((const char*)target + kOffVelocity);
 }
 
 void Recorder::StartPlaying(void* p, char const* demfilename) {
@@ -125,6 +140,17 @@ void Recorder::Start(const char* outputFile) {
 
   Audio.Start(movie.fps, recorder_encoder_volume.GetFloat(), &Video);
 
+  if (recorder_opt_datarec.GetBool()) {
+    capData.clear();
+    capData.reserve(1 << 10);
+
+    Video.OnCaptureFrame([this](int64_t frameIndex, int64_t pts) {
+      int tick = Interfaces::EngineClient->GetDemoPlaybackTick();
+      const float* vel = GetObserverVelocity();
+      capData.push_back({tick, vel[0], vel[1], vel[2]});
+    });
+  }
+
   isRecording = true;
   timeStart = std::chrono::high_resolution_clock::now();
   ConColorMsg(Color(255, 255, 0, 255), "Started recording <%s>\n", movie.filename.c_str());
@@ -139,6 +165,36 @@ void Recorder::Stop() {
 
   int frames = Video.GetFrameCount();
   Video.Stop();
+  Video.OnCaptureFrame(nullptr);
+
+  std::string outPath = movie.directory;
+  if (outPath.back() != '\\') outPath += '\\';
+  outPath += movie.filename;
+
+  if (!capData.empty()) {
+    std::string out;
+    out.reserve(capData.size() * 40);
+
+    char line[96];
+    for (const CapData& s : capData) {
+      int n = snprintf(line, sizeof(line), "%d %.2f %.2f %.2f\n", s.tick, s.velX, s.velY, s.velZ);
+      out.append(line, n);
+    }
+
+    std::string dataPath = outPath;
+    dataPath.replace(dataPath.size() - 4, 4, ".txt");
+
+    FileHandle_t file = g_pFullFileSystem->Open(dataPath.c_str(), "wb", nullptr);
+    if (file == FILESYSTEM_INVALID_HANDLE)
+      ConWarning("Failed to write capdata to %s\n", dataPath.c_str());
+    else {
+      g_pFullFileSystem->Write(out.data(), (int)out.size(), file);
+      g_pFullFileSystem->Close(file);
+    }
+  }
+
+  capData.clear();
+  capData.shrink_to_fit();
 
   ConVarRef host_framerate("host_framerate");
   host_framerate.SetValue(0);
@@ -152,7 +208,7 @@ void Recorder::Stop() {
   const auto timeTotal = std::chrono::duration<float>(timeEnd - timeStart);
   ConColorMsg(Color(255, 255, 0, 255), "Finished recording <%s> in %1.2fs (%i frames, %ix%i @ %i fps)\n", movie.filename.c_str(), timeTotal.count(), frames, movie.width, movie.height, movie.fps);
 
-  ConColorMsg(Color(255, 255, 0, 255), "Saved to: %s\n", (movie.directory + "\\" + movie.filename).c_str());
+  ConColorMsg(Color(255, 255, 0, 255), "Saved to: %s\n", outPath.c_str());
 
   PluginOut("RECORDER_STOP");
 }
