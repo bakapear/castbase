@@ -6,6 +6,8 @@
 #include <filesystem.h>
 #include <replay/ienginereplay.h>
 
+#include <fstream>
+
 #pragma warning(push)
 #pragma warning(disable : 4471)  // warning C4471: '_D3DFORMAT': a forward declaration of an unscoped enumeration must have an underlying type
 #include <client/cliententitylist.h>
@@ -184,12 +186,12 @@ void Recorder::Stop() {
     std::string dataPath = outPath;
     dataPath.replace(dataPath.size() - 4, 4, ".txt");
 
-    FileHandle_t file = g_pFullFileSystem->Open(dataPath.c_str(), "wb", nullptr);
-    if (file == FILESYSTEM_INVALID_HANDLE)
+    std::ofstream file(dataPath, std::ios::binary);
+    if (!file.is_open()) {
       ConWarning("Failed to write capdata to %s\n", dataPath.c_str());
-    else {
-      g_pFullFileSystem->Write(out.data(), (int)out.size(), file);
-      g_pFullFileSystem->Close(file);
+    } else {
+      file.write(out.data(), static_cast<std::streamsize>(out.size()));
+      file.close();
     }
   }
 
