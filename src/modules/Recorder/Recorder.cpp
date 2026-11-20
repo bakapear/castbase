@@ -110,6 +110,24 @@ void Recorder::Start(const char* outputFile) {
   movie.fps = recorder_encoder_fps.GetInt();
   Interfaces::EngineClient->GetScreenSize(movie.width, movie.height);
 
+  if (recorder_opt_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
+
+  bool success = Video.Start((movie.directory + "\\" + movie.filename).c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
+  if (!success) return ConWarning("Failed to start recording!\n");
+
+  Audio.Start(movie.fps, recorder_encoder_volume.GetFloat(), &Video);
+
+  if (recorder_opt_datarec.GetBool()) {
+    capData.clear();
+    capData.reserve(1 << 10);
+
+    Video.OnCaptureFrame([this](int64_t frameIndex, int64_t pts) {
+      int tick = Interfaces::EngineClient->GetDemoPlaybackTick();
+      const float* vel = GetObserverVelocity();
+      capData.push_back({tick, vel[0], vel[1], vel[2]});
+    });
+  }
+
   ConVarRef fps_max("fps_max");
   fps_max.SetValue(0);
 
@@ -131,24 +149,6 @@ void Recorder::Start(const char* outputFile) {
   if (recorder_opt_hidehud.GetBool()) {
     ConVarRef cl_drawhud("cl_drawhud");
     cl_drawhud.SetValue(0);
-  }
-
-  if (recorder_opt_escstop.GetBool()) Interfaces::EngineClient->ClientCmd_Unrestricted("gameui_hide");
-
-  bool success = Video.Start((movie.directory + "\\" + movie.filename).c_str(), movie.fps, recorder_encoder_codec.GetString(), recorder_encoder_qp.GetInt(), SND_SAMPLE_RATE);
-  if (!success) return ConWarning("Failed to start recording!\n");
-
-  Audio.Start(movie.fps, recorder_encoder_volume.GetFloat(), &Video);
-
-  if (recorder_opt_datarec.GetBool()) {
-    capData.clear();
-    capData.reserve(1 << 10);
-
-    Video.OnCaptureFrame([this](int64_t frameIndex, int64_t pts) {
-      int tick = Interfaces::EngineClient->GetDemoPlaybackTick();
-      const float* vel = GetObserverVelocity();
-      capData.push_back({tick, vel[0], vel[1], vel[2]});
-    });
   }
 
   isRecording = true;
