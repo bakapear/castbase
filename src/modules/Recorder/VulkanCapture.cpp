@@ -234,7 +234,7 @@ void VulkanCapture::DestroyFakeDevice() {
 }
 
 bool VulkanCapture::Load() {
-  CreateFakeDevice();
+  if (!CreateFakeDevice()) return false;
 
   void* fnQueuePresentKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(fakeDevice, "vkQueuePresentKHR"));
   if (!hookQueuePresentKHR.Install(fnQueuePresentKHR, &VulkanCapture::QueuePresentKHR, this)) return false;
