@@ -12,17 +12,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_STANDARD 17) # has to be 17 due to C2666 error in utlsymbol.h
 set(HL2SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013/src)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(FFMPEG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/ffmpeg/out")
 
 set(PLUGIN_NAME ${PROJECT_NAME})
 set(PLUGIN_VERSION ${PROJECT_VERSION})
 
 find_package(Vulkan REQUIRED)
 
-find_path(FFMPEG_INCLUDE_DIR NAMES libavcodec/avcodec.h PATHS "${FFMPEG_DIR}/include" NO_DEFAULT_PATH REQUIRED)
-find_library(AVCODEC_LIB NAMES avcodec PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
-find_library(AVFORMAT_LIB NAMES avformat PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
-find_library(AVUTIL_LIB NAMES avutil PATHS "${FFMPEG_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ffmpeg.cmake)
 
 # Git version fetch
 find_package(Git QUIET)
@@ -59,6 +55,8 @@ add_library(${PROJECT_NAME} SHARED
 
     ${MODULE_SOURCES}
 )
+
+add_dependencies(${PROJECT_NAME} ffmpeg)
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
