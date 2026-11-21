@@ -1,15 +1,15 @@
 #include "NoSteam.h"
 
 #include "base/Sig.h"
+#include "tier0/icommandline.h"
 
-void NoSteam::ClientSteamContextActivate(void* p) {
-  auto fn = hookClientSteamContextActivate.GetTrampoline(&NoSteam::ClientSteamContextActivate);
-  if (!steam_disable.GetBool()) fn(p);
-}
+void NoSteam::ClientSteamContextActivate(void* p) {}
 
 bool NoSteam::Load() {
-  void* ptrClientSteamContextActivate = Sig::Scan(SIGPAT_ClientSteamContextActivate);
-  if (!hookClientSteamContextActivate.Install(ptrClientSteamContextActivate, &NoSteam::ClientSteamContextActivate, this)) return false;
+  if (CommandLine()->CheckParm("-nosteam")) {
+    void* ptrClientSteamContextActivate = Sig::Scan(SIGPAT_ClientSteamContextActivate);
+    if (!hookClientSteamContextActivate.Install(ptrClientSteamContextActivate, &NoSteam::ClientSteamContextActivate, this)) return false;
+  }
 
   return true;
 }

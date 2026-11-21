@@ -13,8 +13,6 @@ class NoSteam : public Module {
   void Unload();
 
  private:
-  ConVar steam_disable{"steam_disable", "1", FCVAR_NONE, "Skips initializing steam during game launch"};
-
   // void CClientSteamContext::Activate()
   void ClientSteamContextActivate(void* p);
   Hook hookClientSteamContextActivate;
