@@ -139,12 +139,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 # Post-build steps
+set(DIST_ADDONS "${CMAKE_SOURCE_DIR}/dist/tf/addons")
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/mod
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/mod/addons"
-
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.dll"
-    COMMAND ${CMAKE_COMMAND} -E echo "Plugin { file \"addons/${PROJECT_NAME}\" }" > "${CMAKE_SOURCE_DIR}/mod/addons/${PROJECT_NAME}.vdf"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${DIST_ADDONS}"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${DIST_ADDONS}/${PROJECT_NAME}.dll"
+    COMMAND ${CMAKE_COMMAND} -E echo "Plugin { file \"addons/${PROJECT_NAME}\" }" > "${DIST_ADDONS}/${PROJECT_NAME}.vdf"
 )
