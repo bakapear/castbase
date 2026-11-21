@@ -1,5 +1,9 @@
 #define _SIGPAT_EXP(module, pattern, offs, disp) module, pattern, offs, disp
 
+// https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/game/client/clientsteamcontext.cpp#L58
+// void CClientSteamContext::Activate()
+#define SIGPAT_ClientSteamContextActivate _SIGPAT_EXP("client.dll", "40 53 48 83 EC 20 80 B9 18 01 00 00 00 48 8B D9 75 53", 0, 0)
+
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/game/client/c_baseplayer.cpp#L297
 // RecvPropEHandle ( RECVINFO(m_hObserverTarget), RecvProxy_ObserverTarget )
 #define RECVOFFS_ObserverTarget 0x1650
