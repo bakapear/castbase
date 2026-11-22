@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "default",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "compileCommands": "${workspaceFolder}/build/cmake/compile_commands.json",
             "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
