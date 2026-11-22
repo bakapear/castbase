@@ -4,9 +4,9 @@
 #include <dbg.h>
 
 #ifdef WIN32
-#include "Patterns/Windows.h"
+#include "patterns/Windows.h"
 #else
-#include "Patterns/Linux.h"
+#include "patterns/Linux.h"
 #endif
 
 extern const char* const PLUGIN_NAME;
