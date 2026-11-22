@@ -3,7 +3,11 @@
 #include <Color.h>
 #include <dbg.h>
 
-#include "Patterns.h"
+#ifdef WIN32
+#include "Patterns/Windows.h"
+#else
+#include "Patterns/Linux.h"
+#endif
 
 extern const char* const PLUGIN_NAME;
 extern const char* const PLUGIN_VERSION;
