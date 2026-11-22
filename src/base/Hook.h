@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib/LightHook.h"
+#include "lib/Lighthook.h"
 
 template <typename Instance, typename Func, typename... Args>
 class MemberPointer {

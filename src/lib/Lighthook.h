@@ -76,7 +76,7 @@ static int GetInstructionSize(const void *address)
     int operandPrefix = 0, addressPrefix = 0, rexW = 0;
     unsigned char *b = (unsigned char *)address;
 
-    for (int i = 0; i < 14 && FindByte(PREFIXES, sizeof(PREFIXES), *b) || HOOK_R == 4; i++, b++)
+    for (int i = 0; (i < 14 && FindByte(PREFIXES, sizeof(PREFIXES), *b)) || HOOK_R == 4; i++, b++)
     {
         if (*b == 0x66)
             operandPrefix = 1;
@@ -179,7 +179,7 @@ static HookInformation CreateHook(void *originalFunction, void *targetFunction)
     information.TargetFunction = targetFunction;
 
     int size = 0;
-    while (size < sizeof(JUMP_CODE))
+    while (size < (int)sizeof(JUMP_CODE))
         size += GetInstructionSize((unsigned char *)originalFunction + size);
 
     information.BytesToCopy = size;
@@ -324,6 +324,7 @@ static unsigned long long PlatformProtect(void *address, unsigned long long size
 
     int status = mprotect(address, pageSize, protection);
     assert(status == 0);
+	(void)status;
 
     return protection;
 #endif

@@ -105,7 +105,7 @@ if(MSVC)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE
         "SHELL:-include ${SRC_DIR}/base/Common.h"
-        -Wall -Wextra -fpermissive -fno-strict-aliasing -msse2 -mfpmath=sse
+        -Wall -Wno-format-security -Wno-invalid-offsetof -fpermissive -fno-strict-aliasing -msse2 -mfpmath=sse
     )
 
     target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE

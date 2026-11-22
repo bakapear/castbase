@@ -1,7 +1,9 @@
 #include "Interfaces.h"
 
+#ifdef _WIN32
 enum _D3DFORMAT : int;
 typedef enum _D3DFORMAT D3DFORMAT;
+#endif
 
 #include <GameUI/IGameUI.h>
 #include <cdll_int.h>
@@ -28,7 +30,6 @@ typedef enum _D3DFORMAT D3DFORMAT;
 #include <vgui_controls/HTML.h>
 
 #include "base/Sig.h"
-#include "common.h"
 
 IBaseClientDLL* Interfaces::ClientDLL = nullptr;
 IClientEngineTools* Interfaces::ClientEngineTools = nullptr;

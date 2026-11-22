@@ -638,7 +638,7 @@ bool VulkanCapture::EnsureEncoder(uint32_t w, uint32_t h) {
   if (asyncDepth > 32) asyncDepth = 32;
   {
     char depthStr[16];
-    _snprintf_s(depthStr, sizeof(depthStr), _TRUNCATE, "%d", asyncDepth);
+    snprintf(depthStr, sizeof(depthStr), "%d", asyncDepth);
     if (av_opt_set(encoderCtx->priv_data, "async_depth", depthStr, 0) < 0) {
       REC_LOG("[FFmpeg] async_depth not supported by %s", encoder);
     }

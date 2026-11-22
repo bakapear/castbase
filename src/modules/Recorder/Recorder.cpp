@@ -8,10 +8,14 @@
 
 #include <fstream>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4471)  // warning C4471: '_D3DFORMAT': a forward declaration of an unscoped enumeration must have an underlying type
+#endif
 #include <client/cliententitylist.h>
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include "base/Interfaces.h"
 #include "base/Sig.h"
@@ -99,8 +103,6 @@ void Recorder::Unload() {
 }
 
 void Recorder::Start(const char* outputFile) {
-  if (GetModuleHandleA("shaderapivk.dll") == nullptr) return ConWarning("Recorder only supports Vulkan!\n");
-
   if (isRecording) Stop();
 
   char fullPath[MAX_PATH];

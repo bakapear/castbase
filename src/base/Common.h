@@ -10,31 +10,31 @@ extern const char* const PLUGIN_VERSION;
 extern const char* const PLUGIN_DESC;
 
 template <class... Parameters>
-__forceinline void PluginMsg(const char* fmt, Parameters... param) {
+FORCEINLINE void PluginMsg(const char* fmt, Parameters... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   Msg(fmt, param...);
 }
 
 template <class... Parameters>
-__forceinline void PluginWarning(const char* fmt, const Parameters&... param) {
+FORCEINLINE void PluginWarning(const char* fmt, const Parameters&... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   Warning(fmt, param...);
 }
 
 template <class... Parameters>
-__forceinline void PluginSuccess(const char* fmt, const Parameters&... param) {
+FORCEINLINE void PluginSuccess(const char* fmt, const Parameters&... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   ConColorMsg(Color(0, 153, 0, 255), fmt, param...);
 }
 
 template <class... Parameters>
-__forceinline void PluginColorMsg(const Color& color, const char* fmt, Parameters... param) {
+FORCEINLINE void PluginColorMsg(const Color& color, const char* fmt, Parameters... param) {
   ConColorMsg(Color(0, 153, 153, 255), "[%s] ", PLUGIN_NAME);
   ConColorMsg(color, fmt, param...);
 }
 
 template <class... Parameters>
-__forceinline void PluginOut(const char* fmt, Parameters... param) {
+FORCEINLINE void PluginOut(const char* fmt, Parameters... param) {
   printf("[%s] ", PLUGIN_NAME);
   printf(fmt, param...);
   printf("\n");
