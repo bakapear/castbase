@@ -104,10 +104,11 @@ struct ModuleInfo {
 
 static int FindModule(struct dl_phdr_info* info, size_t, void* data) {
   ModuleInfo* module = (ModuleInfo*)data;
-
   if (!info->dlpi_name || !*info->dlpi_name) return 0;
 
-  if (!strstr(info->dlpi_name, module->name)) return 0;
+  const char* slash = strrchr(info->dlpi_name, '/');
+  const char* base = slash ? slash + 1 : info->dlpi_name;
+  if (strcmp(base, module->name) != 0) return 0;
 
   module->base = info->dlpi_addr;
   return 1;
