@@ -118,7 +118,7 @@ else()
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE COMPILER_GCC POSIX _POSIX LINUX _LINUX GNUC NO_MALLOC_OVERRIDE NO_HOOK_MALLOC)
-    target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL)
+    target_link_options(${PROJECT_NAME} PRIVATE -Wl,--exclude-libs,libavcodec.a:libformat.a:libavutil.a)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON)
 
