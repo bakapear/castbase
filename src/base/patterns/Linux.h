@@ -48,4 +48,4 @@
 
 // https://github.com/mastercomfig/tf2-patches-old/blob/3598ce3f78810b5caf7a3c7ec363588709a73e6d/src/game/shared/particle_property.cpp#L125
 // CNewParticleEffect *CParticleProperty::Create( const char *pszParticleName, ParticleAttachment_t iAttachType, int iAttachmentPoint, Vector vecOriginOffset )
-#define SIGPAT_ParticlePropertyCreate _SIGPAT_EXP("client.so", "55 48 89 E5 41 57 41 56 49 89 F6 41 55 41 54 53 48 89 FB 48 83 EC 38 48 8D 05 ?? ?? ?? ?? 89 55 BC 89 4D B8", 0, 0)
+#define SIGPAT_ParticlePropertyCreate _SIGPAT_EXP("client.so", "55 48 89 E5 41 57 41 56 41 55 49 89 F5 41 54 53 48 89 FB 48 83 EC 38 48 8D 05 ?? ?? ?? ?? 89 55 B8 89", 0, 0)
