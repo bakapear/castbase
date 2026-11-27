@@ -51,7 +51,6 @@ class VulkanCapture {
   std::vector<VkQueueFamilyProperties> queueFamilies;
 
   VkPhysicalDeviceMemoryProperties memoryProperties{};
-  bool rgba8StorageSupported = false;
 
   bool CreateFakeDevice();
   void DestroyFakeDevice();

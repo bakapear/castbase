@@ -59,6 +59,17 @@ static uint32_t FindMemoryType(const VkPhysicalDeviceMemoryProperties& memProps,
   return 0;
 }
 
+static bool HasDeviceExtension(VkPhysicalDevice pd, const char* name) {
+  uint32_t count = 0;
+  vkEnumerateDeviceExtensionProperties(pd, nullptr, &count, nullptr);
+  std::vector<VkExtensionProperties> exts(count);
+  vkEnumerateDeviceExtensionProperties(pd, nullptr, &count, exts.data());
+  for (const auto& e : exts) {
+    if (strcmp(e.extensionName, name) == 0) return true;
+  }
+  return false;
+}
+
 VkResult VKAPI_CALL VulkanCapture::QueuePresentKHR(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
   auto fn = hookQueuePresentKHR.GetTrampoline(&VulkanCapture::QueuePresentKHR);
 
@@ -144,7 +155,7 @@ bool VulkanCapture::CreateFakeDevice() {
   // select GPU (discrete if there is one)
   {
     uint32_t gpu_count = 0;
-    vkEnumeratePhysicalDevices(instance, &gpu_count, NULL);
+    vkEnumeratePhysicalDevices(instance, &gpu_count, nullptr);
     if (gpu_count == 0) {
       REC_LOG("ERROR: no Vulkan physical devices");
       return false;
@@ -165,18 +176,12 @@ bool VulkanCapture::CreateFakeDevice() {
     physicalDevice = gpus[use_gpu];
   }
 
-  // check for storage support
   vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
-  {
-    VkFormatProperties props{};
-    vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_R8G8B8A8_UNORM, &props);
-    rgba8StorageSupported = (props.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) != 0;
-  }
 
   // select graphics queue family
   {
     uint32_t count;
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, NULL);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, nullptr);
     queueFamilies.resize(count);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queueFamilies.data());
     for (uint32_t i = 0; i < count; i++) {
@@ -235,6 +240,20 @@ void VulkanCapture::DestroyFakeDevice() {
 
 bool VulkanCapture::Load() {
   if (!CreateFakeDevice()) return false;
+
+  VkPhysicalDeviceProperties deviceProps{};
+  vkGetPhysicalDeviceProperties(physicalDevice, &deviceProps);
+  if (!HasDeviceExtension(physicalDevice, "VK_KHR_video_encode_h264")) {
+    REC_LOG("ERROR: GPU (%s) does not support VK_KHR_video_encode_h264", deviceProps.deviceName);
+    return false;
+  }
+
+  VkFormatProperties formatProps{};
+  vkGetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_R8G8B8A8_UNORM, &formatProps);
+  if ((formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == 0) {
+    REC_LOG("ERROR: GPU (%s) does not supoort R8G8B8A8_UNORM storage images", deviceProps.deviceName);
+    return false;
+  }
 
   void* fnQueuePresentKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(fakeDevice, "vkQueuePresentKHR"));
   if (!hookQueuePresentKHR.Install(fnQueuePresentKHR, &VulkanCapture::QueuePresentKHR, this)) return false;
@@ -708,12 +727,6 @@ bool VulkanCapture::EnsureEncoder(uint32_t w, uint32_t h) {
 bool VulkanCapture::InitConverter() {
   if (conv.initialized) return true;
   if (conv.disabled) return false;
-
-  if (!rgba8StorageSupported) {
-    REC_LOG("[NV12] ERROR: R8G8B8A8_UNORM storage images unsupported");
-    conv.disabled = true;
-    return false;
-  }
 
   VkCommandPoolCreateInfo poolInfo = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
   poolInfo.queueFamilyIndex = queueFamily;
